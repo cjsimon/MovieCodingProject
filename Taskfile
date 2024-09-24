@@ -1,0 +1,423 @@
+#!/bin/bash
+
+#########
+# Setup #
+#########
+    
+    #############
+    # Functions #
+    #############
+        
+        #############################
+        # Taskfile Helper Functions #
+        #############################
+            
+            function taskfile-main {
+                local args=("$@")
+                
+                # The 'run' argument is optional;
+                # "Shift it out" if it is supplied
+                # 
+                # This behavior can be toggled by setting
+                # one of the following global envvar flags:
+                # 
+                # TASKFILE_DONT_IGNORE_RUN_ARG, TASKFILE_DONT_OMIT_RUN_ARG
+                # or
+                # TASKFILE_IGNORE_RUN_ARG, TASKFILE_OMIT_RUN_ARG
+                # 
+                # Note: Don't supply multiple conflicting flags.
+                #       Doing so will engage the default behavior of ignoring the run arg.
+                #       
+                #       TODO: Fix default behavior not engaging on conflicting flags
+                # 
+                if [[ "${args[0]}" = 'run' ]]; then
+                    if [[ (-n "$TASKFILE_IGNORE_RUN_ARG"      && -n "$TASKFILE_OMIT_RUN_ARG")
+                    ||    (-z "$TASKFILE_DONT_IGNORE_RUN_ARG" && -z "$TASKFILE_DONT_OMIT_RUN_ARG")]]; then
+                        args=("${args[@]:1}")
+                    fi
+                fi
+                
+                # Run the help output for '--help'/'-h'
+                if [[ "${args[0]}" = '--help' || "${args[0]}" = '-h' ]]; then
+                    # "Shift out" the '--help'/'-h' arg
+                    args=("${args[@]:1}")
+                    
+                    taskfile-help "${args[@]}"
+                    return "$?"
+                fi
+                
+                # Otherwise, run the passed task
+                taskfile-run "${args[@]}"
+                return "$?"
+            }
+            
+            function taskfile-help {
+                local args=("$@")
+                local filename=$(basename -- "$0")
+                
+                if [[ -n "${args[@]}" ]]; then
+                    echo "Warning! Ignoring extraneous arguments: ${args[@]}"
+                    echo
+                fi
+                
+                # Display command usage syntax
+                echo "Usage: $filename [run] <task|alias> [args]"
+                
+                # Display tasks
+                taskfile-display-tasks
+            }
+            
+            function taskfile-display-tasks {
+                echo
+                
+                # Display available tasks
+                echo "Tasks:"
+                printf '  - %s\n' "${task_functions[@]}"
+                echo
+                
+                # Display available aliases
+                echo "Aliases:"
+                local alias
+                local aliases
+                for a in "${task_aliases[@]}"; do
+                    alias=$(alias "$a")
+                    
+                    # Strip 'alias ' prefix
+                    alias=${alias/'alias '/''}
+                    # Strip = and replace with colon and tab seperator
+                    alias=${alias/'='/":\t"}
+                    # Strip all quotes
+                    alias=${alias//\'/''}
+                    
+                    tabs 8 # TODO: Better stripping of alias and corresponding command so you can use printf for formatting
+                    echo -e "  - $alias"
+                done
+                echo
+            }
+            
+            function taskfile-run {
+                local args=("$@")
+                
+                # Get the first arg as the given task to run, and "shift it out" of the args list
+                local task="${args[0]}"
+                if [[ -z "$task" ]]; then
+                    # No task specified. Attempt to load the default task if it is defined
+                    if [[ -n "$TASKFILE_DEFAULT_TASK" ]]; then
+                        task="$TASKFILE_DEFAULT_TASK"
+                    else
+                        # No default task defined. Run the command usage help
+                        taskfile-help "${args[@]}"
+                        return "$?"
+                    fi
+                fi
+                args=("${args[@]:1}")
+                
+                #  Validate the task
+                if [[ ! " ${runnable_task_functions_and_aliases[*]} " =~ [[:space:]]${task}[[:space:]] ]]; then
+                    error "Error! Invalid task function or alias: $task"
+                    taskfile-display-tasks
+                    
+                    return 1
+                fi
+                
+                # Run the task
+                    
+                    # If the task is an alias, resolve its aliased function to run
+                    if [[ " ${task_aliases[*]} " =~ [[:space:]]${task}[[:space:]] ]]; then
+                        echo -n "Resolving alias: $task=" # Debug
+                        task=$(command-to-alias "$task") # TODO: Fix
+                        echo "$task" # Debug
+                    fi
+                    
+                    # Don't time the user-defined, nor builtin 'help' tasks, unlike other tasks
+                    #
+                    # TODO: Builtin taskfile-help function name could possibly change after
+                    #       implementing sourcing user tasks from a seperate file
+                    #
+                    if [[ "$task" = 'help' || "$task" = 'taskfile-help' ]]; then
+                        "$task" "${args[@]}"
+                        return "$?"
+                    fi
+                    
+                    TIMEFORMAT="Task completed in %3lR"
+                    time "$task" "${args[@]}"
+                    return "$?"
+            }
+            
+            # TODO: Fix. Maybe this isn't working because its being run
+            #       from a script rather than straight from the commandline?
+            #
+            # https://stackoverflow.com/a/40646465
+            function command-to-alias() {
+                local alias_key
+                local expansion
+                local guess
+                
+                local command="$1" # The command to compact using aliases
+                local search_again="x"
+                local shortest_guess="$command"
+                
+                while [[ "${search_again:-}" ]]; do
+                    unset search_again
+                    for alias_key in "${!BASH_ALIASES[@]}"; do
+                        expansion="${BASH_ALIASES[$alias_key]}"
+                        guess="${command/#"$expansion"/$alias_key}"
+                        test "${#guess}" -lt "${#shortest_guess}" || continue
+                        shortest_guess="$guess"
+                        search_again="x"
+                    done
+                    command="$shortest_guess"
+                done
+                
+                echo "$command"
+            }
+            
+        ####################
+        # Helper Functions #
+        ####################
+            
+            function validateContainer {
+                local args=("$@")
+                
+                local containers=('app' 'database')
+                local targetContainer="${args[0]}"
+                
+                # Validate the targetContainer name
+                if [[ " ${containers[*]} " =~ [[:space:]]${targetContainer}[[:space:]] ]]; then
+                    return 0
+                else
+                    error "Error! Invalid container: $targetContainer"
+                    error "Valid containers: ${containers[*]}"
+                    return 1
+                fi
+            }
+            
+            function debug {
+                local args=("$@")
+                
+                echo -e "${args[@]}"
+            }
+            
+            function error {
+                local args=("$@")
+                
+                local message="${args[0]}"
+                args=("${args[@]:1}")
+                
+                echo "$message" >&2
+            }
+            
+            function editor {
+                local args=("$@")
+                
+                if command -v "$EDITOR" &> /dev/null; then
+                    $EDITOR "${args[0]}"
+                else
+                    error 'Invalid editor! Set the EDITOR environment variable'
+                fi
+            }
+        
+        # List of all defined functions up until now.
+        # Only the helper functions have been defined
+        helper_functions=$(compgen -A function)
+        
+    ########
+    # PATH #
+    ########
+        
+        # NodeJS Module Binaries
+        PATH=./node_modules/.bin:$PATH
+
+#########
+# Tasks #
+#########
+    
+    # TODO: `source` working directory [Tt]askfile, and prefix all tasks in that file with 'task-' to differentiate from helper functions.
+    #       Seperate these Task functions from this driver file; make this file its own executable called task, which runs a user 'Taskfile'
+    #       
+    #       Note: The taskfile should have task functions prefixed with 'task-' so that it can also have non-task functions, such as helper functions.
+    #
+    
+    ########
+    # help #
+    ########
+    #
+    # TODO: Maybe you should make an option or flag for running
+    #       the builtin Taskfile command usage help as opposed to
+    #       a user-defined "help" task for their Taskfile?
+    #       There could likely exists a project-level user-defined
+    #       help task in their Taskfile besides the builtin one.
+    #       At the moment, I'm hardcoding the builtin command usage
+    #       help and do not have a project-level Taskfile help
+    #
+        
+        function help {
+            local args=("$@")
+            
+            taskfile-help "${args[@]}"
+            return "$?"
+        }
+    
+    #########
+    # build #
+    #########
+        
+        function build {
+            local args=("$@")
+            local targetContainer="${args[0]}"
+            
+            # Check if a targetContainer is supplied;
+            # otherwise, all containers will be built
+            if [[ -n "$targetContainer" ]] then
+                
+                validateContainer "$targetContainer"
+                # Check if a validation error occurred
+                if [[ "$?" -ne 0 ]]; then
+                    return "$?"
+                fi
+                # "Shift out" the targetContainer arg from the list of args
+                args=("${args[@]:1}")
+                
+                podman-compose build "$targetContainer" "${args[@]}"
+                return "$?"
+                
+            else
+                
+                # Build all containers
+                podman-compose build "${args[@]}"
+                return "$?"
+                
+            fi
+        }
+        alias install='build'
+    
+    #########
+    # start #
+    #########
+    
+        function start {
+            podman-compose up
+            return "$?"
+        }
+        alias default='start'
+        alias run='default' # TODO: Make a TASKFILE_RUN_RUNS_DEFAULT=1 flag that automatically runs the
+                            #       "default" task if no args are supplied to run. That way, we optionally
+                            #       don't have to include this line under the default alias, and could even
+                            #       potentially omit the "default" alias altogether; although personally,
+                            #       I'd still prefer to use that explicitly defined "default" task myself
+                            #       
+                            #       This would be opposed to showing the help when no args are supplied,
+                            #       so maybe the flag should be renamed: TASKFILE_DEFAULT_TASK='default'
+                            #       
+                            #       Maybe to preserve existing functionality of showing help on no args supplied,
+                            #       have the default effectively be set to to TASKFILE_DEFAULT_TASK='taskfile-help'
+                            #       
+                            #       TODO: Think about which of these flags and behaviors should be default. npm allows
+                            #             for omitting "run" by default, should I also do that, or stick to most verbose
+                            #             options by default, and more loose and lax options by opt in? Likely most verbose;
+                            #             it could be better to be verbose by default to encourage readability and consistency,
+                            #             and just leave it to users to set their own lax preferences for their own use cases,
+                            #             as I, too, will be doing personally with a user alias, 'run', set to run Taskfiles.
+                            #             Laxness defaults seem to imply special rules and cases that need to be accounted for
+        
+    ########
+    # stop #
+    ########
+        
+        function stop {
+            podman-compose stop
+            return "$?"
+        }
+    
+    ########
+    # down #
+    ########
+        
+        function down {
+            podman-compose down
+            return "$?"
+        }
+        alias clean='down'
+    
+    ##########
+    # attach #
+    ##########
+        
+        function attach {
+            local args=("$@")
+            local targetContainer="${args[0]}"
+            
+            validateContainer "$targetContainer"
+            # Check if a validation error occurred
+            if [[ "$?" -ne 0 ]]; then
+                return "$?"
+            fi
+            # "Shift out" the targetContainer arg from the list of args
+            args=("${args[@]:1}")
+            
+            # Attach into the targetContainer
+            podman exec -it "$targetContainer" /bin/bash
+            return "$?"
+        }
+    
+    ###########
+    # restart #
+    ###########
+        
+        function restart {
+            stop
+            down
+            start
+            return "$?"
+        }
+    
+    ###########
+    # rebuild #
+    ###########
+        
+        function rebuild {
+            local args=("$@")
+            
+            if [[ -z "${args[@]}" ]]; then
+                podman-compose build --no-cache
+            fi
+            
+            build "${args[@]}" --no-cache
+            return "$?"
+        }
+    
+    #####################
+    # update-pyprojectx #
+    #####################
+        
+        function update-pyprojectx {
+            curl -LO https://github.com/pyprojectx/pyprojectx/releases/latest/download/wrappers.zip && unzip -o wrappers.zip && rm -f wrappers.zip
+        }
+    
+    ########
+    # edit #
+    ########
+        
+        function edit {
+            local args=("$@")
+            
+            if [[ "${args[0]}" = 'taskfile' ]]; then
+                editor .
+            else
+                editor "${args[0]}"
+            fi
+            
+            return "$?"
+        }
+    
+    # List of all defined functions up until now, including the helper_functions.
+    # helper_functions aren't task_functions. Filter them out from the task_functions
+    task_functions=($(compgen -A function | grep -v "$helper_functions"))
+    task_aliases=($(compgen -a)) # TODO: Use ${BASH_ALIASES[@]}? Is there something like a ${BASH_FUNCTIONS[@]}? Which of these would be safer to rely on?
+    runnable_task_functions_and_aliases=("${task_functions[@]}" "${task_aliases[@]}")
+    
+########
+# Main #
+########
+    
+    taskfile-main "$@"
