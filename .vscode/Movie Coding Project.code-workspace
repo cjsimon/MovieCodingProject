@@ -1,0 +1,19 @@
+{
+	"folders": [
+		{
+			"name": "Project",
+			"path": "../"
+		},
+		/*
+		{
+			"name": "App",
+			"path": "../app/"
+		},
+		{
+			"name": "Database",
+			"path": "../database/"
+		},
+		*/
+	],
+	"settings": {},
+}
