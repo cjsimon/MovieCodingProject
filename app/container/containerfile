@@ -1,4 +1,4 @@
-FROM python:3 AS base-image
+FROM python:3.12 AS base-image
     
     ARG image_variant
     ENV BUILD_ENVIRONMENT=${image_variant}
@@ -14,32 +14,27 @@ FROM shared-base AS shared-os-dependencies
 
 FROM shared-base AS production-os-dependencies
     
-    # Production-only os-level dependencies go here, for example
+    
 
 FROM shared-base AS development-os-dependencies
     
-    # Development-only os-level dependencies go here, for example
+    
 
 FROM ${build_environment}-os-dependencies AS shared-project-dependencies
     
-    # Shared project-level dependencies go here, for example
-    
     WORKDIR /usr/src/app/
+    
     # COPY in the Pipenv requirements independently of the app source
     COPY ./src/Pipfile ./
 
 FROM shared-project-dependencies AS production-project-dependencies
     
-    # Production-only project-level dependencies go here, for example
-    
+    # Install prod app dependencies
     RUN micropipenv install --method pipenv
     
 FROM shared-project-dependencies AS development-project-dependencies
     
-    # Development-only project-level dependencies go here, for example
-    
-    # Install app dependencies
-    COPY ./src/Pipfile ./
+    # Install app dependencies, including dev ones
     RUN micropipenv install --dev --method pipenv
     
     COPY ./src/ ./
