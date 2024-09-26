@@ -38,3 +38,21 @@ FROM shared-project-dependencies AS development-project-dependencies
     RUN micropipenv install --dev --method pipenv
     
     COPY ./src/ ./
+
+FROM ${build_environment}-project-dependencies AS shared-post-project-dependencies
+    
+    
+
+FROM shared-post-project-dependencies AS production-post-project-dependencies
+    
+    
+
+FROM shared-post-project-dependencies AS development-post-project-dependencies
+    
+    
+
+FROM ${build_environment}-post-project-dependencies AS shared-entrypoint
+    
+    # The base-image ENTRYPOINT is set to: python
+    WORKDIR /usr/src/app/
+    CMD run.py
