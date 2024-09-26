@@ -9,6 +9,10 @@
 			"name": "App",
 			"path": "../app/"
 		},
+        {
+			"name": "Api",
+			"path": "../api/"
+		},
 		{
 			"name": "Database",
 			"path": "../database/"
