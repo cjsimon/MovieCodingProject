@@ -17,7 +17,7 @@ class App:
         app.config.from_object(env_config)
         
         # Register the flask_app's routes and bind them to the app
-        from flask_app.routes import Routes
+        from .routes import routes
         app.register_blueprint(routes.app)
         
         return app
