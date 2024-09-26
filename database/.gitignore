@@ -1,0 +1,4 @@
+# Ignore the contents of the data directory
+# and only keep that directory checked-in
+data/*
+!data/.gitkeep
