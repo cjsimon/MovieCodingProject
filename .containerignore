@@ -1,0 +1,2 @@
+# Don't include any container directories in image builds
+**/[Cc]ontainer

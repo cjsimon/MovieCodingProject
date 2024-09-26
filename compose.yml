@@ -1,0 +1,49 @@
+version: '3'
+services:
+  app:
+    container_name: app
+    restart: "no"
+    working_dir: /var/www/html/
+    build:
+      context: ./app/
+      dockerfile: ./containerfile
+    args:
+        image_variant: development
+    volumes:
+      # Source volume for live development from the host
+      - ./src/:/usr/src/app/:Z
+    ports:
+      - 80:80
+    links:
+      - database
+  
+  database:
+    container_name: database
+    restart: "no"
+    build:
+      context: ./database/
+      dockerfile: ./containerfile
+    args:
+        image_variant: development
+    environment:
+      MYSQL_USER: movieapp
+      MYSQL_PASSWORD: hello1234
+      MYSQL_ROOT_PASSWORD: test1234
+      MYSQL_DATABASE: movieapp
+    volumes:
+      - ./mysql/data:/var/lib/mysql
+    ports:
+      - 3306:3306
+    volumes:
+      # Database conf files
+      - ./conf.d/mysql.cnf:/etc/mysql/conf.d/mysql.cnf:Z
+      # Sql files to initialize the server with
+      - ./initdb/:/docker-entrypoint-initdb.d/:Z
+      # Additional sql files
+      - ./sql/:/usr/src/sql/:Z
+      # Database data storage
+      - ./dbdata/:/var/lib/mysql/:Z
+    environment:
+      - MYSQL_ROOT_PASSWORD=pass
+    ports:
+      - 3306:3306
