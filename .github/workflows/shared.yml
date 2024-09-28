@@ -1,0 +1,32 @@
+name: shared
+
+jobs:
+  # https://github.com/orgs/community/discussions/48373#discussioncomment-8755119
+  input-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate image_variant selection
+        run: |
+          if [[ ! "${{ github.event.inputs.image_variant }}" =~ ^(testing|development|staging|production)$ ]]; then
+            echo "Invalid image_variant! Possible values are 'testing', 'development', 'staging' or 'production'"
+            exit 1
+          fi
+  
+  # TODO: Append branch name to end of image tag, and "-latest" for master image-variant
+  build_container:
+    runs-on: ubuntu-latest
+    needs: input-validation
+    steps:
+      - name: Build container
+        run: |
+          podman build -t ${{ secrets.REPO_CONTAINER }}/container:${{ github.event.inputs.image_variant }} -f ${{ github.event.inputs.containerfile_path }} .
+          podman tag ${{ secrets.REPO_CONTAINER }}/container:${{ github.event.inputs.image_variant }} ${{ secrets.REPO_CONTAINER }}/container:${{ github.sha }}
+  
+  push_container:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Push container
+        run: |
+          podman push ${{ secrets.REPO_CONTAINER }}/container:${{ github.event.inputs.image_variant }}
+          podman push ${{ secrets.REPO_CONTAINER }}/container:${{ github.sha }}

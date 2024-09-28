@@ -1,39 +1,6 @@
 name: api
 
-stages:
-  - tests
-  - build
-  - push
-
-unit_tests:
-  stage: tests
-    script:
-    - echo "Running unit tests"
-
-feature_tests:
-  stage: tests
-  script:
-    - echo "Running feature tests"
-
-build_container:
-  stage: build
-  dependencies:
-    - unit_tests
-    - feature_tests
-  script:
-    - podman build -t registry.digitalocean.com/repo/api:$CI_COMMIT_SHA -f api/Containerfile .
-    - podman tag registry.digitalocean.com/repo/api:$CI_COMMIT_SHA registry.digitalocean.com/repo/api:latest
-
-push_container:
-  stage: push
-  dependencies:
-    - build_container
-  script:
-    - podman push registry.digitalocean.com/repo/api:$CI_COMMIT_SHA
-    - podman push registry.digitalocean.com/repo/api:latest
-
 on:
-  # https://github.com/orgs/community/discussions/48373#discussioncomment-8755119
   workflow_dispatch:
     inputs:
       image_variant:
@@ -45,9 +12,32 @@ on:
           - development
           - staging
           - production
-    jobs:
-      input-validation:
-        runs-on: ubuntu-latest
-        steps:
-          - name: Validate image_variant selection
-            run: if [[ ! "${{ github.event.inputs.image_variant }}" =~ ^(testing|development|staging|production)$ ]]; then echo "Invalid image_variant! Possible values are 'testing', 'development', 'staging' or 'production'"; exit 1; fi
+      containerfile_path:
+        type: string
+        description: The path to the service Containerfile
+        required: true
+        default: api/Containerfile
+
+jobs:
+  input_validation:
+    uses: ./.github/workflows/shared.yml#input-validation
+  
+  api_unit_tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run API unit tests
+        run: echo "Running API unit tests"
+  
+  api_feature_tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run API feature tests
+        run: echo "Running API feature tests"
+  
+  api_build_container:
+    uses: ./.github/workflows/shared.yml#build_container
+    needs: [input_validation, api_unit_tests, api_feature_tests]
+  
+  api_push_container:
+    uses: ./.github/workflows/shared.yml#push_container
+    needs: build_container
