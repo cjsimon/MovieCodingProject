@@ -1,0 +1,67 @@
+ARG image_variant
+
+ARG python_version=3.12
+ARG python_image=docker.io/python:${python_version}
+
+ARG base_image=${python_image}
+
+FROM ${base_image} AS base-image
+    
+    ENV BUILD_ENVIRONMENT=${image_variant}
+
+FROM base-image AS base-shared
+    
+    
+
+FROM base-shared AS os-dependencies-shared
+    
+    # Install micropipenv
+    RUN pip install 'micropipenv>=1.8.0,<1.9.0'
+
+FROM os-dependencies-shared AS production-os-dependencies
+    
+    
+
+FROM os-dependencies-shared AS os-dependencies-development
+    
+    
+
+FROM os-dependencies-${image_variant} AS project-dependencies-shared
+    
+    WORKDIR /usr/src/app/
+    
+    # COPY in the Pipenv requirements independently of the app source
+    COPY ./src/Pipfile.lock ./
+
+FROM project-dependencies-shared AS project-dependencies-production
+    
+    # Install prod app dependencies
+    RUN micropipenv install --method pipenv
+    
+FROM project-dependencies-shared AS project-dependencies-development
+    
+    # Install app dependencies, including dev ones
+    RUN micropipenv install --dev --method pipenv
+    
+    COPY ./src/ ./
+
+FROM project-dependencies-${image_variant} AS post-project-dependencies-shared
+    
+    
+
+FROM post-project-dependencies-shared AS post-project-dependencies-production
+    
+    
+
+FROM post-project-dependencies-shared AS post-project-dependencies-development
+    
+    
+
+FROM post-project-dependencies-${image_variant} AS entrypoint-shared
+    
+    WORKDIR /usr/src/app/
+    ENTRYPOINT python
+    CMD run.py
+
+FROM entrypoint-shared AS final-image
+FROM final-image AS moviemanager-app-${image_variant}

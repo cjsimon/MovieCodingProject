@@ -176,18 +176,22 @@
         # Helper Functions #
         ####################
             
+            # The global list of containers defined in the compose stack
+            #
+            # TODO: Parse container-compose.yml and read in valid service containers
+            #       instead of hardcoding them here
+            #
+            containers=('app' 'database')
+            
             function validateContainer {
                 local args=("$@")
                 
-                local containers=('app' 'database')
                 local targetContainer="${args[0]}"
                 
                 # Validate the targetContainer name
                 if [[ " ${containers[*]} " =~ [[:space:]]${targetContainer}[[:space:]] ]]; then
                     return 0
                 else
-                    error "Error! Invalid container: $targetContainer"
-                    error "Valid containers: ${containers[*]}"
                     return 1
                 fi
             }
@@ -264,7 +268,7 @@
         
         function build {
             local args=("$@")
-            local targetContainer="${args[0]}"
+            local targetContainer="${args[0]}" # TODO: Support multiple containers
             
             # Check if a targetContainer is supplied;
             # otherwise, all containers will be built
@@ -273,6 +277,9 @@
                 validateContainer "$targetContainer"
                 # Check if a validation error occurred
                 if [[ "$?" -ne 0 ]]; then
+                    error "Error! Invalid container: $targetContainer"
+                    error "Valid containers: ${containers[*]}"
+                    
                     return "$?"
                 fi
                 # "Shift out" the targetContainer arg from the list of args
@@ -294,11 +301,89 @@
     #########
     # start #
     #########
-    
+        
+        # Either `compose start`s a set of existing containers given their stack service names as args,
+        # or `compose up`s the entire stack. Use -- to seperate between list of containers and command args.
+        #
+        # Note: If `compose up` is determined for use, all args will be passed to that command instaed
+        #
+        # Note: `compose start` only starts existing stopped containers,
+        #       while `compose up` creates them from the stack
+        #
         function start {
-            podman-compose up
-            return "$?"
+            local args=("$@")
+            
+            # Short circut no args to compose-up
+            if [[ -z "${args[@]}" ]]; then
+                podman-compose up "${args[@]}"
+                return "$?"
+            fi
+            
+            # Seperate passed container args from passed command args, whether applicable or not.
+            #
+            # For this function, only the compose-start command requires such a distinction,
+            # but the function determines whether to compose-start or compose-up depending on
+            # the targetContainers supplied anyways.
+            #
+            # While doing all the work upfront maybe wasteful, it's more readable at the moment
+            
+            local separatorHasBeenFound=false
+            
+            local argsList1=() # targetContainer args
+            local argsList2=() # args for the command
+            
+            for currentArg in "${args[@]}"; do
+                [[ "$currentArg" == '--' ]]
+                local argIsSeperator="$?"
+                
+                if [[ "$separatorHasBeenFound" = false && "$argIsSeperator" -eq 0 ]]; then
+                    separatorHasBeenFound=true
+                elif [[ "$separatorHasBeenFound" = false ]]; then
+                    # No seperator yet; arg belongs in the first bucket
+                    argsList1+=("$currentArg")
+                else
+                    # Seperator found; arg belongs in the second bucket
+                    argsList2+=("$currentArg")
+                fi
+            done
+            
+            # In an attempt to compose-start, look for at least one valid container from the targetContainers
+            # otherwise, the container stack will be upped, and both argsLists will be passed to that command
+            
+            # Assume the first set of args are targetContainers
+            local targetContainers="$argsList1"
+            local validTargetContainers=()
+            
+            for targetContainer in "$targetContainers"; do
+                
+                validateContainer "$targetContainer"
+                # If validation was successful, add the container to the set of validTargetContainers for processing;
+                if [[ "$?" -eq 0 ]]; then
+                    validTargetContainers+="$targetContainer"
+                else # otherwise, indicate its invalidity and omit it from the list of validTargetContainers
+                    error "Invalid container: $targetContainer"
+                fi
+            done
+            
+            if (( ${#validTargetContainers[@]} != 0 )); then
+                
+                # Valid targetContainers found;
+                # gather args and compose-start
+                local commandArgs="$argsList2"
+                podman-compose start "${validTargetContainers[@]}" "${commandArgs[@]}"
+                return "$?"
+                
+            else
+                
+                # No valid targetContainers to start supplied;
+                # compose-up instead, using all supplied args
+                argsList1+=("${argsList2[@]}")
+                podman-compose up "${args[@]}"
+                return "$?"
+                
+            fi
         }
+        alias up='start'
         alias default='start'
         alias run='default' # TODO: Make a TASKFILE_RUN_RUNS_DEFAULT=1 flag that automatically runs the
                             #       "default" task if no args are supplied to run. That way, we optionally
@@ -334,8 +419,34 @@
     ########
         
         function down {
-            podman-compose down
-            return "$?"
+            local args=("$@")
+            local targetContainer="${args[0]}" # TODO: Support multiple containers
+            
+            # Check if a targetContainer is supplied;
+            # otherwise, all containers will be downed
+            if [[ -n "$targetContainer" ]] then
+                
+                validateContainer "$targetContainer"
+                # Check if a validation error occurred
+                if [[ "$?" -ne 0 ]]; then
+                    error "Error! Invalid container: $targetContainer"
+                    error "Valid containers: ${containers[*]}"
+                    
+                    return "$?"
+                fi
+                # "Shift out" the targetContainer arg from the list of args
+                args=("${args[@]:1}")
+                
+                podman-compose down "$targetContainer" "${args[@]}"
+                return "$?"
+                
+            else
+                
+                # Down the stack
+                podman-compose down "${args[@]}"
+                return "$?"
+                
+            fi
         }
         alias clean='down'
     
@@ -350,6 +461,9 @@
             validateContainer "$targetContainer"
             # Check if a validation error occurred
             if [[ "$?" -ne 0 ]]; then
+                error "Error! Invalid container: $targetContainer"
+                error "Valid containers: ${containers[*]}"
+                
                 return "$?"
             fi
             # "Shift out" the targetContainer arg from the list of args
@@ -367,7 +481,7 @@
         function restart {
             stop
             down
-            start
+            start #TODO: Use alias 'up' when it works
             return "$?"
         }
     

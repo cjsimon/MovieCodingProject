@@ -2,13 +2,16 @@ version: '3'
 services:
   app:
     container_name: app
-    restart: "no"
-    working_dir: /var/www/html/
+    #
+    #image: 
+    # or
     build:
       context: ./app/
-      dockerfile: ./containerfile
-    args:
-      image_variant: development
+      dockerfile: Containerfile
+      args:
+        image_variant: development
+    #
+    restart: "no"
     environment:
       APPLICATION_ENVIRONMENT: DEVELOPMENT
       APPLICATION_HOST: '0.0.0.0'
@@ -23,25 +26,32 @@ services:
   
   database:
     container_name: database
+    #
+    #image: 
+    # or
+    image: mariadb:lts
+    #
     restart: "no"
-    build:
-      context: ./database/
-      dockerfile: ./containerfile
-    args:
-      image_variant: development
     environment:
+      MYSQL_ROOT_PASSWORD: root1234
       MYSQL_USER: movie_app
       MYSQL_PASSWORD: movie_app1234
-      MYSQL_ROOT_PASSWORD: root1234
       MYSQL_DATABASE: movie_manager
     volumes:
       # Database conf files
       - ./conf.d/mysql.cnf:/etc/mysql/conf.d/mysql.cnf:Z
+      
       # Sql files to initialize the server with
+      #
+      # Note: Only scripts in that top-level directory
+      #       are executed, in alphabetical order
+      #
       - ./initdb/:/docker-entrypoint-initdb.d/:Z
-      # Additional sql files
-      - ./sql/:/usr/src/sql/:Z
-      # Persist database data to host
-      - ./dbdata/:/var/lib/mysql/:Z
+      
+      # Volume-out database data to host as a persistent, named volume
+      - dbdata:/var/lib/mysql/:Z
     ports:
       - 3306:3306
+
+volumes:
+  dbdata:
