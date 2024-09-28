@@ -1,0 +1,36 @@
+stages:
+  - test
+  - build
+  - push
+
+variables:
+  CONTAINER_REGISTRY:
+
+unit_test_app:
+  stage: test
+  script:
+    - echo "Running unit tests for the app"
+    - # TODO
+
+feature_test_app:
+  stage: test
+  script:
+    - echo "Running feature tests for the app"
+    - # TODO
+
+build_app:
+  stage: build
+  dependencies:
+    - unit_test_app
+    - feature_test_app
+  script:
+    - podman build -t $CONTAINER_REGISTRY/app:latest -f app/Containerfile .
+    - podman tag CONTAINER_REGISTRY/app:latest $CONTAINER_REGISTRY/app:$CI_COMMIT_SHA
+
+push_app:
+  stage: push
+  dependencies:
+    - build_app
+  script:
+    - podman push $CONTAINER_REGISTRY/app:latest
+    - podman push $CONTAINER_REGISTRY/app:$CI_COMMIT_SHA
