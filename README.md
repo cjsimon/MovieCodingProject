@@ -28,7 +28,8 @@ If working on Windows, you need to be using [Git for Windows's GitBash](https://
 
 ### Building the Project
 
-
+First, you'll need to authenticate to the container registry:  
+`podman login registry.digitalocean.com`
 
 #### Building the WebApp
 
