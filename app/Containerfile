@@ -1,7 +1,7 @@
 ARG image_variant
 
 ARG python_version=3.12
-ARG python_image=docker.io/python:${python_version}
+ARG python_image=docker.io/python:${python_version} # TODO: Pull and manage this image from our private container registry
 
 ARG base_image=${python_image}
 

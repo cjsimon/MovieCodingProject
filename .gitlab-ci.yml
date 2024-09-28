@@ -5,6 +5,7 @@ stages:
 
 variables:
   CONTAINER_REGISTRY:
+  IMAGE_VARIANT: "production"
 
 unit_test_app:
   stage: test
@@ -24,13 +25,12 @@ build_app:
     - unit_test_app
     - feature_test_app
   script:
-    - podman build -t $CONTAINER_REGISTRY/app:latest -f app/Containerfile .
-    - podman tag CONTAINER_REGISTRY/app:latest $CONTAINER_REGISTRY/app:$CI_COMMIT_SHA
+    - podman build -t $CONTAINER_REGISTRY/app:$IMAGE_VARIANT-$CI_COMMIT_SHA -f app/Containerfile .
 
 push_app:
   stage: push
   dependencies:
     - build_app
   script:
-    - podman push $CONTAINER_REGISTRY/app:latest
-    - podman push $CONTAINER_REGISTRY/app:$CI_COMMIT_SHA
+    - podman push $CONTAINER_REGISTRY/app:$IMAGE_VARIANT-$CI_COMMIT_SHA
+    - if [ "$CI_COMMIT_REF_NAME" == "master" ]; then podman tag $CONTAINER_REGISTRY/app:$IMAGE_VARIANT-$CI_COMMIT_SHA $CONTAINER_REGISTRY/app:$IMAGE_VARIANT-latest && podman push $CONTAINER_REGISTRY/app:$IMAGE_VARIANT-latest; fi

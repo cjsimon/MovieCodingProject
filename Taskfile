@@ -178,10 +178,10 @@
             
             # The global list of containers defined in the compose stack
             #
-            # TODO: Parse container-compose.yml and read in valid service containers
-            #       instead of hardcoding them here
+            # TODO: Parse container-compose.yml and read in valid service
+            #       containers from there instead of hardcoding them here
             #
-            containers=('app' 'database')
+            containers=('app', 'api', 'db')
             
             function validateContainer {
                 local args=("$@")
