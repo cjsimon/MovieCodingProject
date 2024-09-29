@@ -1,0 +1,32 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      
+      - name: Install OpenTofu
+        uses: opentofu/setup-tofu@v1
+        with:
+          version: 1.6.0
+      
+      - name: Initialize OpenTofu
+        run: tofu init
+      
+      - name: Validate OpenTofu configuration
+        run: tofu validate
+      
+      - name: Plan OpenTofu deployment
+        run: tofu plan
+      
+      - name: Apply OpenTofu deployment
+        run: tofu apply
+        env:
+          DO_TOKEN: ${{ secrets.DO_TOKEN }}
