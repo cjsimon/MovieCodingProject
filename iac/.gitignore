@@ -1,1 +1,6 @@
 .terraform
+
+testing.tfvars
+development.tfvars
+staging.tfvars
+production.tfvars

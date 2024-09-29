@@ -13,11 +13,11 @@ class Database():
     session    = None
     Base       = None
     Models     = None
-
+    
     def __init__(self, app, create_tables=False):
         '''
         Setup bindings for a new database for a specified app
-
+        
         app:     The given app instance to bind to
         db:      The instantiated database bound to the app
         engine:  The engine that the db is bound to

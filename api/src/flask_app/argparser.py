@@ -37,6 +37,51 @@ parser.add_argument(
     default=os.environ.get('APPLICATION_PORT'))
 
 parser.add_argument(
+    '--dbhost',
+    help=' '.join([
+        'The database host to establish a connection to',
+        'If unspecified, the DATABASE_HOST envvar is fetched and used']),
+    type=string,
+    required=False,
+    default=os.environ.get('DATABASE_HOST'))
+
+parser.add_argument(
+    '--dbport',
+    help=' '.join([
+        'The database port to establish a connection to',
+        'If unspecified, the DATABASE_PORT envvar is fetched and used']),
+    type=string,
+    required=False,
+    default=os.environ.get('DATABASE_PORT'))
+
+parser.add_argument(
+    '--dbname',
+    help=' '.join([
+        'The database name to use to after a connection is established with the database host',
+        'If unspecified, the DATABASE_NAME envvar is fetched and used']),
+    type=string,
+    required=False,
+    default=os.environ.get('DATABASE_NAME'))
+
+parser.add_argument(
+    '--dbuser',
+    help=' '.join([
+        'The database username for login',
+        'If unspecified, the DATABASE_USERNAME envvar is fetched and used']),
+    type=string,
+    required=False,
+    default=os.environ.get('DATABASE_USERNAME'))
+
+parser.add_argument(
+    '--dbpass',
+    help=' '.join([
+        'The database user password',
+        'If unspecified, the DATABASE_PASSWORD envvar is fetched and used']),
+    type=string,
+    required=False,
+    default=os.environ.get('DATABASE_PASSWORD'))
+
+parser.add_argument(
     '-c', '--create', '--create_tables'
     help='Use this flag to create tables',
     action='store_true')
