@@ -500,13 +500,22 @@
             return "$?"
         }
     
-    #####################
-    # update-pyprojectx #
-    #####################
+    ########
+    # tofu #
+    ########
         
-        function update-pyprojectx {
-            curl -LO https://github.com/pyprojectx/pyprojectx/releases/latest/download/wrappers.zip && unzip -o wrappers.zip && rm -f wrappers.zip
+        function tofu {
+            local args=("$@")
+            
+            local tofu; tofu=$(which tofu); [[ "$?" -eq 0 ]] || return 1
+            
+            pwd
+            pushd . >> /dev/null
+                cd ./iac/src/
+                command "$tofu" "${args[@]}"
+            popd >> /dev/null
         }
+        alias opentofu='tofu'
     
     ########
     # edit #
@@ -515,7 +524,7 @@
         function edit {
             local args=("$@")
             
-            if [[ "${args[0]}" = 'taskfile' ]]; then
+            if [[ "${args[0]}" = 'Taskfile' ]]; then
                 editor .
             else
                 editor "${args[0]}"

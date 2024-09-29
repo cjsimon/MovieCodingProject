@@ -9,24 +9,24 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - name: Checkout the git repo
+        uses: actions/checkout@v4
       
       - name: Install OpenTofu
         uses: opentofu/setup-tofu@v1
         with:
-          version: 1.6.0
+          version: 1.8.2
       
-      - name: Initialize OpenTofu
+      - name: Initialize the OpenTofu stack
         run: tofu init
       
-      - name: Validate OpenTofu configuration
+      - name: Validate the OpenTofu configuration
         run: tofu validate
       
-      - name: Plan OpenTofu deployment
+      - name: Plan the OpenTofu deployment
         run: tofu plan
       
-      - name: Apply OpenTofu deployment
+      - name: Apply the OpenTofu deployment
         run: tofu apply
         env:
           DO_TOKEN: ${{ secrets.DO_TOKEN }}
