@@ -1,8 +1,8 @@
-name: shared
+name: Shared Workflows
 
 jobs:
   # https://github.com/orgs/community/discussions/48373#discussioncomment-8755119
-  input-validation:
+  input_validation:
     runs-on: ubuntu-latest
     steps:
       - name: Validate image_variant selection
@@ -12,21 +12,67 @@ jobs:
             exit 1
           fi
   
-  # TODO: Append branch name to end of image tag, and "-latest" for master image-variant
+  authenticate_container_registry:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Login to the container registry
+        run: doctl registry login
+        env:
+          DIGITALOCEAN_ACCESS_TOKEN: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+  
   build_container:
     runs-on: ubuntu-latest
-    needs: input-validation
+    needs: [input_validation, authenticate_container_registry]
     steps:
-      - name: Build container
+      - name: Checkout the git repo
+        uses: actions/checkout@v4
+      # https://stackoverflow.com/questions/59810838/how-to-get-the-short-sha-for-the-github-workflow
+      - name: Build the ${{ inputs.container_name }} container
         run: |
-          podman build -t ${{ secrets.REPO_CONTAINER }}/container:${{ github.event.inputs.image_variant }} -f ${{ github.event.inputs.containerfile_path }} .
-          podman tag ${{ secrets.REPO_CONTAINER }}/container:${{ github.event.inputs.image_variant }} ${{ secrets.REPO_CONTAINER }}/container:${{ github.sha }}
+          registry_url=${{ secrets.CONTAINER_REGISTRY_URL }}
+          
+          container_name=${{ inputs.container_name }}
+          image_variant=${{ github.event.inputs.image_variant }}
+          short_sha=$(git rev-parse --short HEAD)
+          
+          base_tag=$container_name:$image_variant
+          
+          sha_tag=$base_tag-$short_sha
+          #branch_tag=$base_tag-$branch_name
+          latest_tag=$base_tag-latest
+          
+          base_image_url=$registry_url/$base_tag:$image_variant
+          
+          sha_image_url=$base_image_url-$sha_tag
+          branch_image_url=$base_image_url-$branch_tag
+          latest_image_url=$base_image_url-$latest_tag
+          
+          podman build -t $sha_image_url -f ${{ github.event.inputs.containerfile_path }} .
+          podman tag $sha_image_url $branch_image_url
+          
+          if [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
+            podman tag $sha_image_url $latest_image_url
+          fi
+    inputs:
+      container_name:
+        description: 'The name of the container'
+        required: true
+        default: ${{ github.event.inputs.container_name }}
   
   push_container:
     runs-on: ubuntu-latest
-    needs: build
+    needs: [build_container, authenticate_container_registry]
     steps:
-      - name: Push container
+      - name: Checkout the git repo
+        uses: actions/checkout@v4
+      - name: Push the ${{ inputs.container_name }} container
         run: |
-          podman push ${{ secrets.REPO_CONTAINER }}/container:${{ github.event.inputs.image_variant }}
-          podman push ${{ secrets.REPO_CONTAINER }}/container:${{ github.sha }}
+          podman push ${{ secrets.CONTAINER_REGISTRY_URL }}/${{ inputs.container_name }}:${{ github.event.inputs.image_variant }}
+          if [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
+            podman push ${{ secrets.CONTAINER_REGISTRY_URL }}/${{ inputs.container_name }}:latest
+          fi
+    inputs:
+      container_name:
+        description: 'The name of the container'
+        required: true
+        default: ${{ github.event.inputs.container_name }}

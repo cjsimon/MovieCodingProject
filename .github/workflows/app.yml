@@ -1,43 +1,62 @@
-name: app
+name: App
 
 on:
   workflow_dispatch:
     inputs:
+      service_name:
+        type: string
+        description: The name of this service
+        required: true
+        default: app
+      container_name:
+        type: string
+        description: The name of the container being built and pushed
+        required: true
+        default: ${service_name}
+      containerfile_path:
+        type: string
+        description: The path to the Containerfile
+        required: true
+        default: ${service_name}/Containerfile
       image_variant:
         type: choice
-        description: Select the image variant to build
+        description: The target image variant to build and push
         required: true
         options:
           - testing
           - development
           - staging
           - production
-      containerfile_path:
-        type: string
-        description: The path to the service Containerfile
-        required: true
-        default: app/Containerfile
 
 jobs:
   input_validation:
-    uses: ./.github/workflows/shared.yml#input-validation
+    uses: ./.github/workflows/shared.yml#input_validation
   
-  app_unit_tests:
+  functional_tests:
     runs-on: ubuntu-latest
     steps:
-      - name: Run app unit tests
-        run: echo "Running app unit tests"
+      - name: Run the ${service_name} functional tests
+        run: echo "Running the ${service_name} functional tests"
+        # TODO
   
-  app_feature_tests:
+  unit_tests:
     runs-on: ubuntu-latest
     steps:
-      - name: Run app feature tests
-        run: echo "Running app feature tests"
+      - name: Run the ${service_name} unit tests
+        run: echo "Running the ${service_name} unit tests"
+        # TODO
   
-  app_build_continaer:
+  authenticate_container_registry:
+    uses: ./.github/workflows/shared.yml#authenticate_container_registry
+  
+  build_container:
     uses: ./.github/workflows/shared.yml#build_container
-    needs: [input_validation, app_unit_tests, app_feature_tests]
+    needs: [input_validation, functional_tests, unit_tests, authenticate_container_registry]
+    with:
+      container_name: ${container_name}
   
-  app_push_container:
+  push_container:
     uses: ./.github/workflows/shared.yml#push_container
-    needs: build
+    needs: [build_container, authenticate_container_registry]
+    with:
+      container_name: ${container_name}
