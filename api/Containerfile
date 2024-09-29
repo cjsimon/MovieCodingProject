@@ -64,4 +64,4 @@ FROM post-project-dependencies-${image_variant} AS entrypoint-shared
     CMD run.py
 
 FROM entrypoint-shared AS final-image
-FROM final-image AS moviemanager-app-${image_variant}
+FROM final-image AS moviemanager-api-${image_variant}
