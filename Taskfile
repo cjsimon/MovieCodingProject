@@ -181,7 +181,7 @@
             # TODO: Parse container-compose.yml and read in valid service
             #       containers from there instead of hardcoding them here
             #
-            containers=('app', 'api', 'db')
+            containers=('api' 'app' 'database')
             
             function validateContainer {
                 local args=("$@")
@@ -410,8 +410,34 @@
     ########
         
         function stop {
-            podman-compose stop
-            return "$?"
+            local args=("$@")
+            local targetContainer="${args[0]}" # TODO: Support multiple containers
+            
+            # Check if a targetContainer is supplied;
+            # otherwise, all containers will be downed
+            if [[ -n "$targetContainer" ]] then
+                
+                validateContainer "$targetContainer"
+                # Check if a validation error occurred
+                if [[ "$?" -ne 0 ]]; then
+                    error "Error! Invalid container: $targetContainer"
+                    error "Valid containers: ${containers[*]}"
+                    
+                    return "$?"
+                fi
+                # "Shift out" the targetContainer arg from the list of args
+                args=("${args[@]:1}")
+                
+                podman-compose stop "$targetContainer" "${args[@]}"
+                return "$?"
+                
+            else
+                
+                # Stop the stack
+                podman-compose stop "${args[@]}"
+                return "$?"
+                
+            fi
         }
     
     ########
