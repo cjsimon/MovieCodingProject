@@ -14,15 +14,15 @@ services:
     restart: "no"
     environment:
       APPLICATION_ENVIRONMENT: DEVELOPMENT
-      APPLICATION_HOST: '0.0.0.0'
-      APPLICATION_PORT: 80
+      APPLICATION_HOST:        '0.0.0.0'
+      APPLICATION_PORT:        1234
     volumes:
       # Source code volume for live development from the host
-      - ./src/:/usr/src/api/:Z
+      - ./api/src/:/usr/src/api/:Z
     networks:
       - web
     ports:
-      - 80:80
+      - 80:1234
     links:
       - db
   
@@ -40,11 +40,13 @@ services:
     restart: "no"
     environment:
       APPLICATION_ENVIRONMENT: DEVELOPMENT
-      APPLICATION_HOST: '0.0.0.0'
-      APPLICATION_PORT: 80
+      APPLICATION_HOST:        '0.0.0.0'
+      APPLICATION_PORT:        80
+      API_HOST:                '0.0.0.0'
+      API_PORT:                1234
     volumes:
       # Source code volume for live development from the host
-      - ./src/:/usr/src/app/:Z
+      - ./app/src/:/usr/src/app/:Z
     networks:
       - web
     ports:
@@ -61,29 +63,21 @@ services:
       MYSQL_DATABASE: movie_manager
     volumes:
       # Database conf files
-      - ./conf.d/mysql.cnf:/etc/mysql/conf.d/mysql.cnf:Z
+      - ./database/conf.d/mysql.cnf:/etc/mysql/conf.d/mysql.cnf:Z
       
       # Sql files to initialize the server with
       #
       # Note: Only scripts in that top-level directory
       #       are executed, in alphabetical order
       #
-      - ./initdb/:/docker-entrypoint-initdb.d/:Z
+      - ./database/initdb/:/docker-entrypoint-initdb.d/:Z
       
-      # Volume-out database data to host as a persistent, named volume
-      - dbdata:/var/lib/mysql/:Z
+      # Volume-out database data to the host
+      - ./database/dbdata:/var/lib/mysql/:Z
     networks:
       - db
     ports:
       - 3306:3306
-    
-volumes:
-  dbdata:
-    driver: local
-    driver_opts:
-      type: "nfs"
-      o: "addr=db-host,nolock,soft,rw"
-      device: ":/mnt/dbdata"
 
 networks:
   web:
