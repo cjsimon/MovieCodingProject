@@ -1,1 +1,1 @@
-import ../routes/routes
+from ..routes import Routes
