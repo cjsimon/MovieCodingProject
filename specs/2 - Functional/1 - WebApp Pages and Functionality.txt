@@ -1,0 +1,29 @@
+Movie Search Page:
+
+- Search bar on top. List of movies below
+
+- The search bar should make the appropriate calls to fetch the corresponding data requested according to the search query
+  - Data can come from both the API, and potentially pre-fetched/cached data that could either exist on disk, as images might, or could exist in the database, as could simpler data types
+
+- There should be an option to fetch and display the User's list of Favorite'd movies
+
+For each movie in the list of movies, display:
+  - title
+  - year
+  - rating
+
+- Upon clicking a movie from the list, show more info
+  - Explore the possibility of using a pseudo "new" page, or a popup of sorts that comes in front of the existing page, so that the existing movie results data is preserved and not unloaded while it may still be needed
+
+Movie Details Page:
+
+Details for a selected Movie
+
+- Don't redirect, just render over the Movie Search Results Page
+
+- Display:
+  - plot
+  - director
+  - actors
+
+On this "new" page, an option to save the movie to the database as a favorite should be implemented. Also a back button to "return to the previous page"

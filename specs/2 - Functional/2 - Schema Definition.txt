@@ -1,0 +1,17 @@
+User
+- id       PK
+- email    PK
+- name     
+
+Movie
+- id       PK
+- title    
+- year,    
+- rating   
+- plot     
+- director 
+- actors   
+
+Users_Movies
+- user_id  PK FK:User
+- movie_id PK FK:Movie

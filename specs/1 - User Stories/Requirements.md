@@ -11,7 +11,7 @@ The app should display search results with basic information such as title, year
 The app should implement pagination to handle large search result sets (e.g., display 10 movies per page)
 
 The app should integrate with the OMDB API, or a similar public movie database API, to search for movies by title:
-  - [OMDB Sign up](https://www.omdbapi.com/apikey.aspx) | [OMDB API Documentation](https://www.omdbapi.com/)
+  - [OMDb Sign up](https://www.omdbapi.com/apikey.aspx) | [OMDb API Documentation](https://www.omdbapi.com/#usage)
   - API Key: **REDACTED**
 
 ### Movie Detail View
