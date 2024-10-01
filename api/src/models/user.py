@@ -3,9 +3,9 @@ from sqlalchemy import PrimaryKeyConstraint
 from flask_app.serializer import Serializer
 
 def init(Base):
-    '''
+    """
     Init the table with a late binding inherited Base
-    '''
+    """
     
     class User(Base):
         __tablename__ = 'User'
@@ -16,16 +16,16 @@ def init(Base):
         PrimaryKeyConstraint(id)
         
         def __init__(self, email=None, name=None):
-            '''
+            """
             Initialize this instance's columns with the input data.
             This allows for managing a given single user record
-            '''
+            """
             
             self.email = email
             self.name  = name
         
         def __repr__(self):
-            return '<PK: %r\nUsername: %r>' % (self.id, self.email)
+            return '<PK: %r\nEmail: %r>' % (self.id, self.email)
         
         def serialize(self):
             Serializer.serialize(self)

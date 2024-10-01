@@ -5,12 +5,12 @@ import os, sys
 parser = ArgumentParser(description='MovieManager WebApp')
 
 parser.add_argument(
-    '-d', '--daemon', '--daemonize'
+    '-d', '--daemon', '--daemonize',
     help='Use this flag to daemonize the process',
     action='store_true')
 
 parser.add_argument(
-    '-e', '--env', '--environment'
+    '-e', '--env', '--environment',
     help=' '.join([
         'Environment to use when launching the WebApp.'
         'If unspecified, the APPLICATION_ENVIRONMENT envvar is fetched and used']),
@@ -19,11 +19,11 @@ parser.add_argument(
     default=os.environ.get('APPLICATION_ENVIRONMENT'))
 
 parser.add_argument(
-    '-h', '--host',
+    '-a', '--host', '--address',
     help=' '.join([
-        'Host ip to broadcast the server on',
-        'If unspecified, the APPLICATION_ENVIRONMENT envvar is fetched and used']),
-    type=int,
+        'Host address to broadcast the server on',
+        'If unspecified, the APPLICATION_HOST envvar is fetched and used']),
+    type=str,
     required=False,
     default=os.environ.get('APPLICATION_HOST'))
 
@@ -31,15 +31,10 @@ parser.add_argument(
     '-p', '--port',
     help=' '.join([
         'Port to broadcast the server on',
-        'If unspecified, the APPLICATION_ENVIRONMENT envvar is fetched and used']),
+        'If unspecified, the APPLICATION_PORT envvar is fetched and used']),
     type=int,
     required=False,
     default=os.environ.get('APPLICATION_PORT'))
-
-parser.add_argument(
-    '-c', '--create', '--create_tables'
-    help='Use this flag to create tables',
-    action='store_true')
 
 def parse_args():
     """

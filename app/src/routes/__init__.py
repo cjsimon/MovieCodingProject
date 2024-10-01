@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template
+import os
 
 class Routes:
     
@@ -7,27 +8,30 @@ class Routes:
     """
     Pages = None
     
-    def __init__(self, parent_app) {
-        """ Routes constructor """
+    """
+    The blueprint to be registered by the parent_app instance.
+    
+    These routes are for defining and handling web pages
+    """
+    blueprint = Blueprint('app', __name__)
+    
+    def __init__(self, parent_app):
+        """ App Routes constructor """
         
         """ The parent app instance this Routes instance belongs to """
-        self.parent_app = app
-        
-        """ The app blueprint for defining and handling routes """
-        self.app_blueprint = Blueprint('app', __name__)
+        self.app = parent_app
         
         """ The pages directory relative to the webroot """
-        self.pages_dir = os.path.join(app.instance_path, 'pages')
+        self.pages_dir = os.path.join(self.app.config['BASEDIR'], 'pages')
         
-        """
-        All pages are dict values with their page name as the key,
-        and the following path within the pages_dir: {page}/{page}.html
-        """
-        Pages = { page: os.path.join(pages_dir, '%s/%s.html' % page) for page in [
-            'Main'
-        ]} if Pages is None else Pages # Do not re-determine Pages if they've already been determined
-    }
+        # Do not re-determine Pages if they've already been determined
+        if self.Pages is None:
+            # All pages are dict values with their page name as the key,
+            # and the following path within the pages_dir: {page}/{page}.html
+            self.Pages = { page: os.path.join(self.pages_dir, '%(page)s/%(page)s.html' % { 'page': page }) for page in [
+                'Main'
+            ]}
     
-    @app_blueprint.route('/', methods = ['GET', 'POST'])
+    @blueprint.route('/', methods = ['GET', 'POST'])
     def index():
         return render_template(Pages.Main)

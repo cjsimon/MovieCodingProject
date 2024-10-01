@@ -8,23 +8,26 @@ import sqlalchemy
 
 class Routes:
     
-    def __init__(self, parent_app, parent_database) {
-        """ Routes constructor """
+    """
+    The blueprint to be registered by the parent_app instance.
+    
+    These routes are for defining and handling API endpoints
+    """
+    blueprint = Blueprint('api', __name__)
+    
+    def __init__(self, parent_app, parent_database):
+        """ API Routes constructor """
         
         """ The parent app instance this Routes instance belongs to """
         self.app = parent_app
         
         """ The parent database instance this Routes instance belongs to """
         self.database = parent_database
-        
-        """ The blueprint for defining and handling API endpoints """
-        self.api_blueprint = Blueprint('api', __name__)
-    }
     
     # TODO: Create appropriate routes according to the external api.
     #       Don't forget to whitelist their ip as a firewall egress rule
     #
-    @app_blueprint.route('/', methods = ['GET', 'POST'])
+    @blueprint.route('/', methods = ['GET', 'POST'])
     def index():
         with self.database.engine.connect() as connection:
             connection = http.client.HTTPSConnection('{base api url goes here}')

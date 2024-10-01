@@ -1,5 +1,6 @@
-import sys
 from enum import Enum
+import os
+import sys
 
 class Environment(Enum):
     """
@@ -17,6 +18,7 @@ class Config(object):
     """
     Configuration base for all app environments
     """
+    BASEDIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     CSRF_ENABLED = True
 
 class ProductionConfig(Config):

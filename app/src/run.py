@@ -1,4 +1,4 @@
-from .flask_app import App, argparser
+from flask_app import App, argparser
 import os, sys
 
 def main():
@@ -9,8 +9,8 @@ def main():
     if args.daemon and os.fork():
         sys.exit()
     
-    app = App(args.env)
+    app = create_app(args.env)
     app.run(host=args.host, port=args.port, debug=False)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

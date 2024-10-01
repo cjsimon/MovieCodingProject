@@ -17,6 +17,7 @@ class Config(object):
     """
     Configuration base for all app environments
     """
+    BASEDIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     CSRF_ENABLED = True
     SQLALCHEMY_DATABASE_URI = \
         # dialect+driver://username:password@host/:port/database
