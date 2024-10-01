@@ -3,6 +3,31 @@ name: Shared Workflows
 on:
   workflow_call:
     inputs:
+      service_name:
+        type: string
+        description: The name of this service
+        required: true
+        default: app
+      container_name:
+        type: string
+        description: The name of the container being built and pushed
+        required: true
+        default: ${service_name}
+      containerfile_path:
+        type: string
+        description: The path to the Containerfile
+        required: true
+        default: ${service_name}/Containerfile
+      image_variant:
+        type: choice
+        description: The target image variant to build and push
+        required: true
+        options:
+          - testing
+          - development
+          - staging
+          - production
+      
       # Flags to determine which of the jobs to run by the job using this workflow
       #
       # Note: I beleive a "parent" job using multiple "shared" jobs from this workflow
@@ -49,20 +74,12 @@ jobs:
         env:
           DIGITALOCEAN_ACCESS_TOKEN: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
   
-  build_container:
-    if: ${{ inputs.run_build_container }}
+  define_registry_variables:
     runs-on: ubuntu-latest
-    needs: [input_validation, authenticate_container_registry]
-    outputs:
-      vars: ${{ steps.vars.outputs }} # Expose defined registry variables
-                                      # See: https://stackoverflow.com/questions/59175332/using-output-from-a-previous-job-in-a-new-one-in-a-github-action
     steps:
-      - name: Checkout the git repo
-        uses: actions/checkout@v4
-      
       # https://stackoverflow.com/questions/59810838/how-to-get-the-short-sha-for-the-github-workflow
       - name: Define registry variables
-        id: vars
+        id: define_registry_variables
         run: |
           echo "registry_url=${{ secrets.CONTAINER_REGISTRY_URL }}"     >> $GITHUB_OUTPUT
           
@@ -73,7 +90,7 @@ jobs:
           echo "base_tag=$container_name:$image_variant"                >> $GITHUB_OUTPUT
           
           echo "sha_tag=$base_tag-$short_sha"                           >> $GITHUB_OUTPUT
-          echo "#branch_tag=$base_tag-$branch_name"                     >> $GITHUB_OUTPUT
+          #echo "branch_tag=$base_tag-$branch_name"                     >> $GITHUB_OUTPUT
           echo "latest_tag=$base_tag-latest"                            >> $GITHUB_OUTPUT
           
           echo "base_image_url=$registry_url/$base_tag:$image_variant"  >> $GITHUB_OUTPUT
@@ -81,35 +98,49 @@ jobs:
           echo "sha_image_url=$base_image_url-$sha_tag"                 >> $GITHUB_OUTPUT
           echo "branch_image_url=$base_image_url-$branch_tag"           >> $GITHUB_OUTPUT
           echo "latest_image_url=$base_image_url-$latest_tag"           >> $GITHUB_OUTPUT
+    outputs:
+      # Expose defined registry variables
+      # See: https://stackoverflow.com/questions/59175332/using-output-from-a-previous-job-in-a-new-one-in-a-github-action
+      outputs: ${{ steps.define_registry_variables.outputs }}
+    
       
+  build_container:
+    if: ${{ inputs.run_build_container }}
+    runs-on: ubuntu-latest
+    needs: [define_registry_variables]
+    steps:
+      - name: Checkout the git repo
+        uses: actions/checkout@v4
+        
       - name: Build the ${{ inputs.container_name }} container
         run: |
-          podman build -t ${{ steps.vars.outputs.sha_image_url }} -f ${{ github.event.inputs.containerfile_path }} .
-          podman tag ${{ steps.vars.outputs.sha_image_url }} ${{ steps.vars.outputs.branch_image_url }}
+          podman build -t ${{ needs.define_registry_variables.outputs.sha_image_url }} -f ${{ github.event.inputs.containerfile_path }} .
+          podman tag ${{ needs.define_registry_variables.outputs.sha_image_url }} ${{ needs.define_registry_variables.outputs.branch_image_url }}
     inputs:
       container_name:
-        description: 'The name of the container'
+        description: The name of the container
         required: true
         default: ${{ github.event.inputs.container_name }}
   
   push_container:
     if: ${{ inputs.run_push_container }}
     runs-on: ubuntu-latest
-    needs: [build_container, authenticate_container_registry]
+    needs: [define_registry_variables]
     steps:
       - name: Checkout the git repo
         uses: actions/checkout@v4
       
       - name: Push the ${{ inputs.container_name }} container
         run: |
-          podman push ${{ needs.build_container.outputs.vars.sha_image_url }} -f ${{ github.event.inputs.containerfile_path }}
+          podman push ${{ needs.define_registry_variables.outputs.outputs.vars.sha_image_url }} -f ${{ github.event.inputs.containerfile_path }}
           
+          # Only push latest tag on master branch
           if [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
-            podman tag ${{ needs.build_container.outputs.vars.sha_image_url }} ${{ needs.build_container.outputs.vars.latest_image_url }}
-            podman push ${{ needs.build_container.outputs.vars.latest_image_url }}
+            podman tag ${{ needs.define_registry_variables.outputs.outputs.vars.sha_image_url }} ${{ needs.define_registry_variables.outputs.outputs.vars.latest_image_url }}
+            podman push ${{ needs.define_registry_variables.outputs.outputs.vars.latest_image_url }}
           fi
     inputs:
       container_name:
-        description: 'The name of the container'
+        description: The name of the container
         required: true
         default: ${{ github.event.inputs.container_name }}

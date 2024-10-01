@@ -1,4 +1,4 @@
-name: App
+name: Verify, Build, and Push the App Image
 
 on:
   push:
@@ -46,7 +46,7 @@ jobs:
   
   unit_tests:
     runs-on: ubuntu-latest
-    needs: [functional-tests]
+    needs: [functional_tests]
     steps:
       - name: Run the ${service_name} unit tests
         run: echo "Running the ${service_name} unit tests"
@@ -54,18 +54,16 @@ jobs:
   
   authenticate_container_registry:
     uses: ./.github/workflows/shared.yml
-    needs: [build_container]
     with:
       run_authenticate_container_registry: true
     secrets: inherit
     
   build_container:
     uses: ./.github/workflows/shared.yml
-    needs: [unit_tests]
+    needs: [unit_tests, authenticate_container_registry]
     with:
       container_name: ${container_name}
       image_variant: ${image_variant}
-      run_authenticate_container_registry: true
       run_build_conainer: true
     secrets: inherit
   
@@ -75,6 +73,5 @@ jobs:
     with:
       container_name: ${container_name}
       image_variant: ${image_variant}
-      run_authenticate_container_registry: true
       run_push_conainer: true
     secrets: inherit
