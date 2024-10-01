@@ -1,7 +1,7 @@
 name: Verify, Build, and Push the Api Image
 
 on:
-  push:
+  workflow_dispatch:
     inputs:
       service_name:
         type: string

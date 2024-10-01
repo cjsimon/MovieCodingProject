@@ -19,14 +19,9 @@ on:
         required: true
         default: ${service_name}/Containerfile
       image_variant:
-        type: choice
+        type: string
         description: The target image variant to build and push
         required: true
-        options:
-          - testing
-          - development
-          - staging
-          - production
       
       # Flags to determine which of the jobs to run by the job using this workflow
       #
