@@ -42,5 +42,5 @@ terraform {
         
         environment                = "${var.environment}"
         do_token                   = "${var.do_token}"
-        app_firewall_whitelist_ips = "${var.app_firewall_whitelist_ips}"
+        app_firewall_whitelist_ips = var.app_firewall_whitelist_ips
       }
