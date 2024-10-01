@@ -1,8 +1,36 @@
 name: Shared Workflows
 
+on:
+  workflow_call:
+    inputs:
+      # Flags to determine which of the jobs to run by the job using this workflow
+      #
+      # Note: I beleive a "parent" job using multiple "shared" jobs from this workflow
+      #       will have those "shared" jobs executed in the order they are defined here
+      #       under the `jobs:` label, *not* in the order the flags are passed in,
+      #       in the "parent" job
+      #
+      run_input_validation:
+        required: false
+        type: boolean
+        default: false
+      run_authenticate_container_registry:
+        required: false
+        type: boolean
+        default: false
+      run_build_container:
+        required: false
+        type: boolean
+        default: false
+      run_push_container:
+        required: false
+        type: boolean
+        default: false
+
 jobs:
   # https://github.com/orgs/community/discussions/48373#discussioncomment-8755119
   input_validation:
+    if: ${{ inputs.run_input_validation }}
     runs-on: ubuntu-latest
     steps:
       - name: Validate image_variant selection
@@ -13,6 +41,7 @@ jobs:
           fi
   
   authenticate_container_registry:
+    if: ${{ inputs.run_authenticate_container_registry }}
     runs-on: ubuntu-latest
     steps:
       - name: Login to the container registry
@@ -21,6 +50,7 @@ jobs:
           DIGITALOCEAN_ACCESS_TOKEN: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
   
   build_container:
+    if: ${{ inputs.run_build_container }}
     runs-on: ubuntu-latest
     needs: [input_validation, authenticate_container_registry]
     outputs:
@@ -63,6 +93,7 @@ jobs:
         default: ${{ github.event.inputs.container_name }}
   
   push_container:
+    if: ${{ inputs.run_push_container }}
     runs-on: ubuntu-latest
     needs: [build_container, authenticate_container_registry]
     steps:

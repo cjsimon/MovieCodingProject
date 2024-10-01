@@ -30,33 +30,51 @@ on:
 
 jobs:
   input_validation:
-    uses: ./.github/workflows/shared.yml#input_validation
+    uses: ./.github/workflows/shared.yml
+    with:
+      run_input_validation: true
+      image_variant: ${image_variant}
+    secrets: inherit
   
   functional_tests:
     runs-on: ubuntu-latest
+    needs: [input_validation]
     steps:
       - name: Run the ${service_name} functional tests
         run: echo "Running the ${service_name} functional tests"
-        # TODO
+        # TODO: Checkout repo and run pytest on ${service_name}/tests/feature/*
   
   unit_tests:
     runs-on: ubuntu-latest
+    needs: [functional-tests]
     steps:
       - name: Run the ${service_name} unit tests
         run: echo "Running the ${service_name} unit tests"
-        # TODO
+        # TODO: Checkout repo and run pytest on ${service_name}/tests/unit/*
   
   authenticate_container_registry:
-    uses: ./.github/workflows/shared.yml#authenticate_container_registry
-  
+    uses: ./.github/workflows/shared.yml
+    needs: [build_container]
+    with:
+      run_authenticate_container_registry: true
+    secrets: inherit
+    
   build_container:
-    uses: ./.github/workflows/shared.yml#build_container
-    needs: [input_validation, functional_tests, unit_tests, authenticate_container_registry]
+    uses: ./.github/workflows/shared.yml
+    needs: [unit_tests]
     with:
       container_name: ${container_name}
+      image_variant: ${image_variant}
+      run_authenticate_container_registry: true
+      run_build_conainer: true
+    secrets: inherit
   
   push_container:
-    uses: ./.github/workflows/shared.yml#push_container
-    needs: [build_container, authenticate_container_registry]
+    uses: ./.github/workflows/shared.yml
+    needs: [build_container]
     with:
       container_name: ${container_name}
+      image_variant: ${image_variant}
+      run_authenticate_container_registry: true
+      run_push_conainer: true
+    secrets: inherit
