@@ -24,7 +24,11 @@ FROM os-dependencies-shared AS production-os-dependencies
 
 FROM os-dependencies-shared AS os-dependencies-development
     
-    
+    # Install PipEnv too for development,
+    # just to keep functionality consistent
+    # between host and container, as documented.
+    # See: /README.md#Working-with-Project-Level-Dependencies
+    RUN pip install pipenv
 
 FROM os-dependencies-${image_variant} AS project-dependencies-shared
     
@@ -43,6 +47,8 @@ FROM project-dependencies-shared AS project-dependencies-development
     # Install app dependencies, including dev ones
     RUN micropipenv install --dev --method pipenv
     
+    # Copy in the src code so that we have ready to go pre-built images
+    # without needing to volume in a source code directory ourselves
     COPY ./src/ ./
 
 FROM project-dependencies-${image_variant} AS post-project-dependencies-shared

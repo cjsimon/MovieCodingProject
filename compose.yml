@@ -25,6 +25,9 @@ services:
       APPLICATION_PORT:        1234
     volumes:
       # Source code volume for live development from the host
+      #
+      # Note: You may comment out this volume to use the src/
+      #       code that comes pre-built with this image variant
       - ./api/src/:/usr/src/api/:Z
     networks:
       - web
@@ -48,9 +51,9 @@ services:
     #
     # Uncomment to override the service container's
     # default command and entrypoint for debugging
-    #command: ""
-    #entrypoint: /bin/bash # podman exec -i
-    #tty: true             # podman exec -t
+    command: ""
+    entrypoint: /bin/bash # podman exec -i
+    tty: true             # podman exec -t
     #
     environment:
       APPLICATION_ENVIRONMENT: DEVELOPMENT
@@ -60,6 +63,9 @@ services:
       API_PORT:                1234
     volumes:
       # Source code volume for live development from the host
+      #
+      # Note: You may comment out this volume to use the src/
+      #       code that comes pre-built with this image variant
       - ./app/src/:/usr/src/app/:Z
     networks:
       - web

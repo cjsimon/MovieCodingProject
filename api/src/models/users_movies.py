@@ -1,7 +1,6 @@
-from datetime import datetime
-from sqlalchemy import Column, Integer, String, DateTime, Boolean
-from sqlalchemy import ForeignKey, PrimaryKeyConstraint, ForeignKeyConstraint
-from api.serializer import Serializer
+from sqlalchemy import Column, Integer
+from sqlalchemy import PrimaryKeyConstraint, ForeignKeyConstraint
+from serializer import Serializer
 
 def init(Base):
     """

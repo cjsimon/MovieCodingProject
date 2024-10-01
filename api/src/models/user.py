@@ -1,6 +1,6 @@
-from sqlalchemy import Column, Integer, String, Boolean
+from sqlalchemy import Column, Integer, String
 from sqlalchemy import PrimaryKeyConstraint
-from flask_app.serializer import Serializer
+from serializer import Serializer
 
 def init(Base):
     """

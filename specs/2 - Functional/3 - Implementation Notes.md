@@ -2,7 +2,13 @@
 
 Brief explanations on work done, and choices and assumptions made.
 
-These are just notes for extra info; this stuff wouldn't typically exist in the repo, but could exist on a wiki with other formal project docs.
+These are just notes for extra info; this stuff wouldn't typically exist in the repo, but could potentially exist on a wiki with other formal, or informal, project docs.
+
+I'm not really married to the choices I made, nor technologies I used; they were mainly chosen circumstantially. Most of my choices prioritized experimentation and learning since I had the opportunity to make my own personal decisions for this test-case project, with its few technology stack requirements. If I were to re-creating this project using a different set of required technologies, it would yeild a very similar project structure, typically prioritizing extensibility, elegance (in use and readability), and efficiency, according to requirements.
+
+Most of my development experience happens to consist of work done for large-scale, long-term, high maintanence clients, each with varying demands and security requirements and policies; the assumptions I made for this project might reflect some of that. I am not quick to necessarily use what I am comfortable with, but that which might be better suited for a project. Even for the multi-tenant workflows I've managed in the past for example, where all most all use cases are the same, there has existed a level where cookie-cutter templates haven't been able to cover the scope of the requirements. In those scenarios, we try to stick to standard best practices and known development and architechture paradignms as best we can. For that particular experience in the past, for example, we opted to write an internal API in our existing Laravel codebase that could manage the varying custom workflows and frontends that more and more tenants began to require, instead of quickly building template, one-off frontends in vue—we abstracted the manual cookie-cutter templating work to save longterm time rather than shortterm time with potential added tech debt longterm.
+
+For this project, it could have been benefitial to use more popular tools and technologies that I might've been slightly more comfortable and efficient in, but I decided to prioritize experimentation and learning over the arguably more fitting requirements of better delivery speed, better extensibility, better standardization, and even better security in some areas, since I'd be spending a lot of my personal time on it. This project was large in scope, not in depth; to me, that's where true complexity seems to lie.
 
 ## Project
 
@@ -26,21 +32,25 @@ I originally wrote my pipelines as GitLab Workflows, but after I decided to swit
 
 ### E2E
 
-I've used Selenium in the past, and, as with the CI tool, I wanted to try something new to compare it against. I decided to give Microsoft's [Playwright](https://playwright.dev/) a try since it seems to support the three major browser engines I'm most interested in, which are the engine runtimes I have picked to target and supprt for this application: Firefox's, Chrome's (and Edge's), and Safari's. It also has many different language bindings, including Python.
+I've used Selenium in the past, and, as with the CI tool, I wanted to try something new to compare it against. I decided to give Microsoft's [Playwright](https://playwright.dev/) a try since it seems to support the three major browser engines I'm most interested in, which are the engine runtimes I have picked to target and supprt for this application: Firefox's, Chrome's (and Edge's), and Safari's. It also has many different language bindings for its API, including Python bindings.
 
 ## Services
+
+For the App and the Api containers, according to typical hardened image standards and best practices, you shouldn't be using the root user to install, manage and run project-level dependencies, but a project-level user, like Apache for php containers, or some python user for a python runtime. I didn't have time to look into this.
 
 ### App
 
 #### Frontend
 
-I decided to keep this part of the project simple due to time constraints; although, at first, I wanted to try to use react and a few simple components, just to try out [Material UI](https://github.com/mui/material-ui) again. If I remember correctly, I haven't used Material UI since working with React Native around 2016-2018. I stumbled upon the library again while researching for this project, and wanted to try it out with just plain React.
+I decided to keep this part of the project simple due to time constraints; although, at first, I wanted to try to use React and make a few simple components just to try out [Material UI](https://github.com/mui/material-ui) again. I haven't used Material UI since working with React Native around 2016-2018. I had stumbled upon the library again while researching for this project, and had wanted to try it out with just plain React this time.
+
+Before starting this project, I had recently been playing with [EJS templates](https://ejs.co/) (the same ones [Express](https://expressjs.com/en/api.html#app.engine) makes use of) and a modern, custom [HTML Imports](https://www.w3.org/standards/history/html-imports.html/) shim in an attempt to conjure up a simple client-side component/templating library for fun. Since this was a simple test-case project, instead of relying on a more robust, standardized, and cookie-cutter framework, like React, I decided to rope in my alpha framework instead to see how well it'd currently fair against a real-world project. As it stands now, I'm not certain that the way the EJS templates and html imports are fetched is CSP Compliant; for that endevour, I will be looking into how React and Angular deal with seemingly dynamic html and js content rendering. (Early on, AngularJS and 2 used to use ajax under the hood—I'm not sure if that's still the case). But, yes, under normal circumstances, React could be preferable, even for a simple project such as this one.
 
 ### API
 
 #### Models
 
-The models should probably eventually inherit a base model class, which contains the work for establishing the late class binding, loads the common imports(if possible?), and defines the common serialization methods.
+The models should probably eventually inherit a base model class, which can contain the work for establishing the late class binding, loading the common imports(if possible? Seems like it), and defining the common serialization methods.
 
 ### Database
 
@@ -55,3 +65,7 @@ I had considered making the email the primary key in the User table, but we'd ha
 ###### `ondelete='CASCADE'`
 
 It could be argued as preemptive to outright delete, in this case, all, of a user's data after they close their account, but for the purposes of this demo, that's what would occur; a user's movie data is deleted once their user is removed from the system database.
+
+## Deployment
+
+It might make sense to explore including a single `volume`-in of the source code for each cluster, rather than having each container carry a `COPY`of it.

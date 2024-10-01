@@ -1,6 +1,6 @@
-from sqlalchemy import Column, Integer, String, Boolean
+from sqlalchemy import Column, Integer, String
 from sqlalchemy import PrimaryKeyConstraint
-from flask_app.serializer import Serializer
+from serializer import Serializer
 
 def init(Base):
     """
@@ -19,11 +19,10 @@ def init(Base):
         plot     = Column(String(120) nullable=True,  unique=False)
         director = Column(String(120) nullable=True,  unique=False)
         actors   = Column(String(120) nullable=True,  unique=False) # TODO: Construct actors on the fly with db table?
+                                                                    #       Could also do this for the Movies as well
         PrimaryKeyConstraint(id)
         PrimaryKeyConstraint(title)
         PrimaryKeyConstraint(year)
-        
-        
         
         def __init__(self, title=None, year=None, rating=None, plot=None, director=None, actors=None):
             """
