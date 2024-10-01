@@ -529,6 +529,11 @@
     ########
     # tofu #
     ########
+    #
+    # TODO: Wrap commands for `plan`ning and `deploy`ing
+    #       infrustructure with a valid environment arg
+    #       instead of wrapping the whole binary like this
+    #
         
         function tofu {
             local args=("$@")

@@ -26,7 +26,7 @@ I originally wrote my pipelines as GitLab Workflows, but after I decided to swit
 
 ### E2E
 
-I've used Selenium in the past, and, as with the CI tool, I wanted to try something new to compare it against. I decided to give Microsoft's [Playwright](https://playwright.dev/) a try since it seems to support the three major browser engines I'm most interested in, which are the engine runtimes I have picked to target and supprt for this application: Firefox's, Chrome's (and Edge's), and Safari's.
+I've used Selenium in the past, and, as with the CI tool, I wanted to try something new to compare it against. I decided to give Microsoft's [Playwright](https://playwright.dev/) a try since it seems to support the three major browser engines I'm most interested in, which are the engine runtimes I have picked to target and supprt for this application: Firefox's, Chrome's (and Edge's), and Safari's. It also has many different language bindings, including Python.
 
 ## Services
 
@@ -34,7 +34,7 @@ I've used Selenium in the past, and, as with the CI tool, I wanted to try someth
 
 #### Frontend
 
-I decided to keep this part of the project simple due to time constraints; although, at first, I wanted to try to use react and a few simple components, just to try out Material UI again. If I remember correctly, I haven't used Material UI since working with React Native around 2016-2018. I stumbled upon the library again while researching for this project, and wanted to try it out with just plain React.
+I decided to keep this part of the project simple due to time constraints; although, at first, I wanted to try to use react and a few simple components, just to try out [Material UI](https://github.com/mui/material-ui) again. If I remember correctly, I haven't used Material UI since working with React Native around 2016-2018. I stumbled upon the library again while researching for this project, and wanted to try it out with just plain React.
 
 ### API
 

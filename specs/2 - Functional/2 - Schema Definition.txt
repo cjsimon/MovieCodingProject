@@ -1,12 +1,12 @@
 User
 - id       PK
-- email    PK
+- email    
 - name     
 
 Movie
 - id       PK
-- title    
-- year,    
+- title    PK
+- year     PK
 - rating   
 - plot     
 - director 
