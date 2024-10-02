@@ -15,7 +15,7 @@ class Routes:
     """
     blueprint = Blueprint('api', __name__)
     
-    def __init__(self, parent_app, parent_database):
+    def __init__(self, parent_app, parent_database=None):
         """ API Routes constructor """
         
         """ The parent app instance this Routes instance belongs to """

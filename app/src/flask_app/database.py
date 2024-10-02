@@ -1,8 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
-from flask_sqlalchemy_session import flask_scoped_session
 import models
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 import sys
 
@@ -36,8 +35,8 @@ class Database():
         #self.engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'], echo=True)
         self.engine = self.db.get_engine(app=app)
         
-        # Create a db session using the flask builtin session handler
-        self.session = flask_scoped_session(
+        # Create a db session using the SQLAlchemy session handler
+        self.session = scoped_session(
             sessionmaker(
                 autocommit=True,
                 autoflush=True,

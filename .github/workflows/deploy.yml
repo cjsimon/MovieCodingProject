@@ -1,9 +1,7 @@
-name: Deploy IaC
+name: Deploy an Environment
 
 on:
-  push:
-    branches:
-      - master
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -15,7 +13,8 @@ jobs:
       - name: Install OpenTofu
         uses: opentofu/setup-opentofu@v1
         with:
-          version: 1.8.2
+          tofu_version: 1.8.2
+          github_token: ${{ secrets.CI_GITHUB_TOKEN }}
       
       - name: Initialize the OpenTofu stack
         run: tofu init

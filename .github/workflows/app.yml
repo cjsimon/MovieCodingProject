@@ -1,4 +1,4 @@
-name: Verify, Build, and Push the App Image
+name: Push App Image
 
 on:
   workflow_dispatch:

@@ -18,8 +18,9 @@ class Config(object):
     """
     Configuration base for all app environments
     """
-    BASEDIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    CSRF_ENABLED = True
+    BASEDIR         = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    CSRF_ENABLED    = False
+    TEMPLATE_FOLDER = os.path.join(BASEDIR, 'pages/')
 
 class ProductionConfig(Config):
     """

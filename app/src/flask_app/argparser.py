@@ -2,7 +2,7 @@ from . import configuration as config
 from argparse import ArgumentParser
 import os, sys
 
-parser = ArgumentParser(description='MovieManager WebApp')
+parser = ArgumentParser(description='MovieManager API')
 
 parser.add_argument(
     '-d', '--daemon', '--daemonize',
@@ -12,10 +12,13 @@ parser.add_argument(
 parser.add_argument(
     '-e', '--env', '--environment',
     help=' '.join([
-        'Environment to use when launching the WebApp.'
+        'Environment to use when launching the API.'
         'If unspecified, the APPLICATION_ENVIRONMENT envvar is fetched and used']),
     type=config.Environment,
-    required=True,
+    required=False, # Should be True, but even with a default set,
+                    # an error occurs if a value isn't explicitly supplied.
+                    # Luckly, the type enforcement catches the case of the
+                    # envvar not being defined, so this should be okay atm
     default=os.environ.get('APPLICATION_ENVIRONMENT'))
 
 parser.add_argument(
@@ -35,6 +38,61 @@ parser.add_argument(
     type=int,
     required=False,
     default=os.environ.get('APPLICATION_PORT'))
+
+parser.add_argument(
+    '--database', '--use-database',
+    help='Use this flag to instantiate a database connection to the specified database',
+    action='store_true')
+
+parser.add_argument(
+    '--dbhost',
+    help=' '.join([
+        'The database host to establish a connection to',
+        'If unspecified, the DATABASE_HOST envvar is fetched and used']),
+    type=str,
+    required=False,
+    default=os.environ.get('DATABASE_HOST'))
+
+parser.add_argument(
+    '--dbport',
+    help=' '.join([
+        'The database port to establish a connection to',
+        'If unspecified, the DATABASE_PORT envvar is fetched and used']),
+    type=str,
+    required=False,
+    default=os.environ.get('DATABASE_PORT'))
+
+parser.add_argument(
+    '--dbname',
+    help=' '.join([
+        'The database name to use to after a connection is established with the database host',
+        'If unspecified, the DATABASE_NAME envvar is fetched and used']),
+    type=str,
+    required=False,
+    default=os.environ.get('DATABASE_NAME'))
+
+parser.add_argument(
+    '--dbuser',
+    help=' '.join([
+        'The database username for login',
+        'If unspecified, the DATABASE_USERNAME envvar is fetched and used']),
+    type=str,
+    required=False,
+    default=os.environ.get('DATABASE_USERNAME'))
+
+parser.add_argument(
+    '--dbpass',
+    help=' '.join([
+        'The database user password',
+        'If unspecified, the DATABASE_PASSWORD envvar is fetched and used']),
+    type=str,
+    required=False,
+    default=os.environ.get('DATABASE_PASSWORD'))
+
+parser.add_argument(
+    '-c', '--create', '--create_tables',
+    help='Use this flag to create the database tables if they don\'t already exist',
+    action='store_true')
 
 def parse_args():
     """

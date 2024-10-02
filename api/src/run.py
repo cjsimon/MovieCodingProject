@@ -1,4 +1,4 @@
-from flask_app import App, argparser
+from flask_app import argparser, create_app
 import os, sys
 
 def main():
@@ -9,8 +9,16 @@ def main():
     if args.daemon and os.fork():
         sys.exit()
     
-    app = create_app(args.env)
-    app.run(host=args.host, port=args.port, debug=False)
+    app = create_app(
+        name         ='MovieManager WebApp',
+        env          =args.env,
+        create_tables=args.create,
+        use_database =args.database)
+    
+    app.run(
+        host=args.host,
+        port=args.port,
+        debug=False)
 
 if __name__ == '__main__':
     main()

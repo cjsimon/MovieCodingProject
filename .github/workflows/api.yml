@@ -1,4 +1,4 @@
-name: Verify, Build, and Push the Api Image
+name: Push Api Image
 
 on:
   workflow_dispatch:

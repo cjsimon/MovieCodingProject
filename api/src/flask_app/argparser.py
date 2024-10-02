@@ -15,7 +15,10 @@ parser.add_argument(
         'Environment to use when launching the API.'
         'If unspecified, the APPLICATION_ENVIRONMENT envvar is fetched and used']),
     type=config.Environment,
-    required=True,
+    required=False, # Should be True, but even with a default set,
+                    # an error occurs if a value isn't explicitly supplied.
+                    # Luckly, the type enforcement catches the case of the
+                    # envvar not being defined, so this should be okay atm
     default=os.environ.get('APPLICATION_ENVIRONMENT'))
 
 parser.add_argument(
@@ -35,6 +38,11 @@ parser.add_argument(
     type=int,
     required=False,
     default=os.environ.get('APPLICATION_PORT'))
+
+parser.add_argument(
+    '--database', '--use-database',
+    help='Use this flag to instantiate a database connection to the specified database',
+    action='store_true')
 
 parser.add_argument(
     '--dbhost',

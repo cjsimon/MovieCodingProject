@@ -18,7 +18,7 @@ class Config(object):
     Configuration base for all app environments
     """
     BASEDIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    CSRF_ENABLED = True
+    #CSRF_ENABLED = True
     SQLALCHEMY_DATABASE_URI = \
         # dialect+driver://username:password@host/:port/database
         'mysql+mysqlconnector://%(username)s:%(password)s@%(hostname)s/:%(hostport)/%(database)s' % {
@@ -29,7 +29,8 @@ class Config(object):
             database: args.dbname
         }
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-
+    TEMPLATE_FOLDER = os.path.join(BASEDIR, 'pages/')
+    
 class ProductionConfig(Config):
     """
     Live environment with production data

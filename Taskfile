@@ -527,6 +527,38 @@
         }
     
     ########
+    # lock #
+    ########
+    #
+    # Locks service-level app dependencies
+    #
+    # TODO: This task should exist seperately in Taskfiles
+    #       that live in each of the service-level directories.
+    #       This parent Taskfile would then proxy tasks issued
+    #       here to the service being targeted, if applicable.
+    #       The same could be done for the container management tasks
+    #       
+    #       Locking could also occur within the container
+    #       instead of the host like this, if the host
+    #       src/ code volume is active, so that the user
+    #       doesn't necessarily need to install PipEnv
+    #       on their host
+    #
+        
+        function lock {
+            local args=("$@")
+            
+            local services=('app' 'api')
+            
+            for service in "${services[@]}"; do
+                pushd . >> /dev/null
+                    cd "./$service/src/"
+                    command pipenv lock "${args[@]}"
+                popd >> /dev/null
+            done
+        }
+    
+    ########
     # tofu #
     ########
     #
@@ -540,7 +572,6 @@
             
             local tofu; tofu=$(which tofu); [[ "$?" -eq 0 ]] || return 1
             
-            pwd
             pushd . >> /dev/null
                 cd ./iac/src/
                 command "$tofu" "${args[@]}"
