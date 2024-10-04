@@ -2,8 +2,6 @@
 
 A movie management webapp—Search and view details on movies, and save your favorites!
 
-Currently, the webapp is [temporarily hosted here]().
-
 ## Development
 
 ### Requirements

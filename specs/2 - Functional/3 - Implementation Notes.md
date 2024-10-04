@@ -36,7 +36,7 @@ I've used Selenium in the past, and, as with the CI tool, I wanted to try someth
 
 ## Services
 
-According to typical hardened image standards and best practices, you shouldn't be using the root user to install, manage and run project-level dependencies, but a project-level user, like Apache for php containers, or some python user for a python runtime. I didn't have time to look into this. See the "User and group id", and "Running nginx as a non-root user" sections of the docs for the official [nginx docker image](https://hub.docker.com/_/nginx/), for example.
+According to typical hardened image standards and best practices, you shouldn't be using the root user to install, manage and run project-level dependencies, but a project-level user, like Apache for php containers, or some python user for a python runtime, etc. I didn't have time to look into this. See the "User and group id", and "Running nginx as a non-root user" sections of the docs for the official [nginx docker image](https://hub.docker.com/_/nginx/), for example.
 
 ### App
 
@@ -44,13 +44,13 @@ According to typical hardened image standards and best practices, you shouldn't 
 
 I decided to keep this part of the project simple due to time constraints; although, at first, I wanted to try to use React and make a few simple components just to try out [Material UI](https://github.com/mui/material-ui) again. I haven't used Material UI since working with React Native around 2016-2018. I had stumbled upon the library again while researching for this project, and had wanted to try it out with just plain React this time.
 
-Before starting this project, I had recently been playing with [EJS templates](https://ejs.co/) (the same ones [Express](https://expressjs.com/en/api.html#app.engine) makes use of) and a modern, custom [HTML Imports](https://www.w3.org/standards/history/html-imports.html/) shim in an attempt to conjure up a simple client-side component/templating library for fun. Since this was a simple test-case project, instead of relying on a more robust, standardized, and cookie-cutter framework, like React, I decided to rope in my alpha framework instead to see how well it'd currently fair against a real-world project. As it stands now, I'm not certain that the way the EJS templates and html imports are fetched is CSP Compliant; for that endeavor, I will be looking into how React and Angular deal with seemingly dynamic html and js content rendering. (Early on, AngularJS and 2 used to use ajax under the hood—I'm not sure if that's still the case). But, yes, under normal circumstances, React could be preferable, even for a simple project such as this one.
+Before starting this project, I had recently been playing with [EJS templates](https://ejs.co/) (the same ones [Express](https://expressjs.com/en/api.html#app.engine) makes use of) and a modern, custom [HTML Imports](https://www.w3.org/standards/history/html-imports.html/) shim in an attempt to conjure up a simple client-side component/templating library for fun. Since this was a simple test-case project, instead of relying on a more robust, standardized, and cookie-cutter framework, like React, I decided to rope in my alpha framework instead to see how well it'd currently fair against a real-world project. As it stands now, I'm not certain that the way the EJS templates and html imports are fetched is CSP Compliant; for that endeavor, I will be looking into how React and Angular deal with seemingly dynamic html and js content rendering. (Early on, AngularJS and 2 used to use ajax under the hood—I'm not sure if that's still the case). But, yes, under normal circumstances, React could be preferable, even for a simple project such as this one. The ES6 JS modules aren't currently working, due to some requests getting blocked (see: Troubleshooting the Development Server). I tried EJS on a test apache server and it was pretty interesting.
 
 #### Troubleshooting the Development Server
 
 Loading module from “http://127.0.0.1/static/libraries/JSTemplates/JSTemplates.js” was blocked because of a disallowed MIME type (“text/html”).
 
-I figured this would work as expected if hosting with a reverse proxy such as NGINX, instead of hosting with the development server. I had first tried using a wsgi wrapper, which is why I included gunicorn, which is also apparently much more performant that the native implementation.
+I tried disabling flask's CSRF mode to see if that was the culprit, but maybe it's just the development server itself. I figured this would work as expected if hosting with a reverse proxy such as NGINX, instead of hosting with the development server. The development server pointing to the reverse-proxy didn't seem to make a difference. I just switched to using a production-ready wsgi python server to try with the reverse-proxy, and I'm still seeing the same issue. Might need more investigation before I can work on the frontend.
 
 ### API
 
