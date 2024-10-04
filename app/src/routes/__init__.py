@@ -28,7 +28,7 @@ class Routes:
     Pages = { page: '%(page)s/%(page)s.html' % { 'page': page } for page in [
         'Main'
     ]}
-    print(Pages)
+    
     def __init__(self, parent_app, parent_database=None):
         """ App Routes constructor """
         

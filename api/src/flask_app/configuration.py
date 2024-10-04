@@ -1,7 +1,7 @@
-import sys
-from enum import Enum
+from enum import StrEnum
+import os, sys
 
-class Environment(Enum):
+class Environment(StrEnum):
     """
     The types of app environments
     """
@@ -9,25 +9,24 @@ class Environment(Enum):
     STAGING     = 'STAGING'
     DEVELOPMENT = 'DEVELOPMENT'
     TESTING     = 'TESTING'
-    
-    def __str__(self):
-        return self.name
 
 class Config(object):
     """
     Configuration base for all app environments
     """
     BASEDIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    #CSRF_ENABLED = True
+    CSRF_ENABLED = True
+    
+    # dialect+driver://username:password@host:port/database
     SQLALCHEMY_DATABASE_URI = \
-        # dialect+driver://username:password@host/:port/database
-        'mysql+mysqlconnector://%(username)s:%(password)s@%(hostname)s/:%(hostport)/%(database)s' % {
-            username: args.dbuser
-            password: args.dbpass
-            hostname: args.dbhost
-            hostport: args.dbport
-            database: args.dbname
+        'mariadb+mariadbconnector://%(username)s:%(password)s@%(hostname)s:%(hostport)s/%(database)s' % {
+            'username': os.environ.get('DATABASE_USER'),
+            'password': os.environ.get('DATABASE_PASS'),
+            'hostname': os.environ.get('DATABASE_HOST'),
+            'hostport': os.environ.get('DATABASE_PORT'),
+            'database': os.environ.get('DATABASE_NAME'),
         }
+    
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     TEMPLATE_FOLDER = os.path.join(BASEDIR, 'pages/')
     

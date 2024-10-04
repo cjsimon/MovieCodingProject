@@ -1,24 +1,28 @@
-from flask_app import argparser, create_app
 import os, sys
 
-def main():
-    args = argparser.get_args()
-    
-    # If requested to run as a daemon,
-    # fork then close this process
-    if args.daemon and os.fork():
-        sys.exit()
-    
-    app = create_app(
-        name         ='MovieManager WebApp',
-        env          =args.env,
-        create_tables=args.create,
-        use_database =args.database)
-    
-    app.run(
-        host=args.host,
-        port=args.port,
-        debug=False)
+from flask_app import create_app, Environment
+from flask_app.libs import str2bool
 
-if __name__ == '__main__':
-    main()
+APP_NAME          = os.environ['APPLICATION_NAME']
+APP_ENV           = os.environ['APPLICATION_ENVIRONMENT']
+APP_USE_DATABASE  = str2bool(os.environ['APPLICATION_USES_DATABASE'])
+APP_CREATE_TABLES = str2bool(os.environ['APPLICATION_INIT_DATABASE'])
+APP_HOST          = os.environ['APPLICATION_HOST']
+APP_PORT          = os.environ['APPLICATION_PORT']
+
+app = create_app(
+    name         =APP_NAME,
+    env          =APP_ENV,
+    use_database =APP_USE_DATABASE,
+    create_tables=APP_CREATE_TABLES,)
+
+if APP_ENV == Environment.TESTING or APP_ENV == Environment.DEVELOPMENT:
+    app.run(
+        host=APP_HOST,
+        port=APP_PORT,
+        debug=True,)
+
+if APP_ENV == Environment.STAGING or APP_ENV == Environment.PRODUCTION:
+    from gevent.pywsgi import WSGIServer
+    http_server = WSGIServer((APP_HOST, APP_PORT), app)
+    http_server.serve_forever()

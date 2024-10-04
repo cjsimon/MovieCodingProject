@@ -1,9 +1,11 @@
+import sys
+
 from flask_sqlalchemy import SQLAlchemy
-import models
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
-import sys
+
+from models import Models
 
 class Database():
     

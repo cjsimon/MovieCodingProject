@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: database
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: database
+  template:
+    metadata:
+      labels:
+        app: database
+    spec:
+      containers:
+      - name: database
+        image: mariadb:lts
+        env: # TODO: Use secrets instead
+        - name: MYSQL_ROOT_PASSWORD
+          value: "root1234"
+        - name: MYSQL_USER
+          value: "movie_app"
+        - name: MYSQL_PASSWORD
+          value: "movie_app1234"
+        - name: MYSQL_DATABASE
+          value: "movie_manager"
+        ports:
+        - containerPort: 3306

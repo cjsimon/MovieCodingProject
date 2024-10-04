@@ -443,6 +443,12 @@
     ########
     # down #
     ########
+    #
+    # Note: The -t option in the compose-down command can
+    #       be used to forcibly SIGKILLs the containers a
+    #       specified number of seconds after the initial
+    #       SIGTERM command is issued
+    #
         
         function down {
             local args=("$@")
@@ -543,6 +549,11 @@
     #       src/ code volume is active, so that the user
     #       doesn't necessarily need to install PipEnv
     #       on their host
+    #
+    # TODO: Two sets of args, first set specifying the target services,
+    #       else all services if none specified, and the second set being
+    #       the set of args to pass to the pipenv lock command. Seperate
+    #       sets of args with --. See the other container tasks doing this
     #
         
         function lock {

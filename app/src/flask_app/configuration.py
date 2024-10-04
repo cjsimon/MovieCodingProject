@@ -1,8 +1,7 @@
-from enum import Enum
-import os
-import sys
+from enum import StrEnum
+import os, sys
 
-class Environment(Enum):
+class Environment(StrEnum):
     """
     The types of app environments
     """
@@ -10,16 +9,13 @@ class Environment(Enum):
     STAGING     = 'STAGING'
     DEVELOPMENT = 'DEVELOPMENT'
     TESTING     = 'TESTING'
-    
-    def __str__(self):
-        return self.name
 
 class Config(object):
     """
     Configuration base for all app environments
     """
     BASEDIR         = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    CSRF_ENABLED    = False
+    CSRF_ENABLED    = True
     TEMPLATE_FOLDER = os.path.join(BASEDIR, 'pages/')
 
 class ProductionConfig(Config):

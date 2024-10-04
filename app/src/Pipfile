@@ -1,17 +1,18 @@
 [[source]]
-url                      = "https://pypi.org/simple"
-verify_ssl               = true
-name                     = "pypi"
+url              = "https://pypi.org/simple"
+verify_ssl       = true
+name             = "pypi"
 
 [requires]
-python_version           = "~=3.12"
+python_version   = "~=3.12"
 
 [packages]
-flask                    = "~=3.0"
-flask-cache              = "~=0.13"
-flask-sqlalchemy         = "~=3.1"
-requests                 = "~=2.32"
-tendo                    = "~=0.3"
+flask            = "~=3.0"
+flask-cache      = "~=0.13"
+flask-sqlalchemy = "~=3.1"
+gevent           = "~=24.2"
+gunicorn         = "~=23.0"
+requests         = "~=2.32"
 
 [dev-packages]
-pylint                   = "~=3.3"
+pylint           = "~=3.3"

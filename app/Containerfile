@@ -1,4 +1,5 @@
 ARG image_variant
+ENV BUILD_ENVIRONMENT=${image_variant}
 
 ARG python_version=3.12
 ARG python_image=docker.io/python:${python_version} # TODO: Pull and manage this image from our private container registry
@@ -7,7 +8,7 @@ ARG base_image=${python_image}
 
 FROM ${base_image} AS base-image
     
-    ENV BUILD_ENVIRONMENT=${image_variant}
+    
 
 FROM base-image AS base-shared
     
@@ -66,8 +67,8 @@ FROM post-project-dependencies-shared AS post-project-dependencies-development
 FROM post-project-dependencies-${image_variant} AS entrypoint-shared
     
     WORKDIR /usr/src/app/
-    ENTRYPOINT python
-    CMD run.py
+    ENTRYPOINT ["gunicorn"]
+    CMD ["run:app"]
 
 FROM entrypoint-shared AS final-image
 FROM final-image AS moviemanager-app-${image_variant}

@@ -1,6 +1,6 @@
+from flask_app.serializer import Serializer
 from sqlalchemy import Column, Integer, String
 from sqlalchemy import PrimaryKeyConstraint
-from serializer import Serializer
 
 def init(Base):
     """
@@ -10,8 +10,8 @@ def init(Base):
     class User(Base):
         __tablename__ = 'User'
         
-        id    = Column(Integer)
-        email = Column(String(120)  nullable=False)
+        id    = Column(Integer,     nullable=False)
+        email = Column(String(120), nullable=False)
         name  = Column(String(120), nullable=False, unique=False)
         PrimaryKeyConstraint(id)
         

@@ -1,6 +1,6 @@
+from flask_app.serializer import Serializer
 from sqlalchemy import Column, Integer
 from sqlalchemy import PrimaryKeyConstraint, ForeignKeyConstraint
-from serializer import Serializer
 
 def init(Base):
     """
@@ -10,18 +10,14 @@ def init(Base):
     class Users_Movies(Base):
         __tablename__ = 'Users_Movies'
         
-        user_id  = Column(Integer)
-        movie_id = Column(Integer)
-        PrimaryKeyConstraint(
-            'user_id'
-            'movie_id',
-            name='pk_user_movie'
-        ),
-        ForeignKeyConstraint(['user_id', 'User.id'], name='fk_user'
+        user_id  = Column(Integer, nullable=False)
+        movie_id = Column(Integer, nullable=False)
+        PrimaryKeyConstraint(user_id, movie_id, name='pk_user_movie'),
+        ForeignKeyConstraint(columns=['user_id'], refcolumns=['User.id'], name='fk_user',
             onupdate='RESTRICT',
             ondelete='CASCADE'
         )
-        ForeignKeyConstraint(['movie_id', 'Movie.id'], name='fk_movie'
+        ForeignKeyConstraint(columns=['movie_id'], refcolumns=['Movie.id'], name='fk_movie',
             onupdate='RESTRICT',
             ondelete='CASCADE'
         )
