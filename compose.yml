@@ -1,14 +1,10 @@
 version: '3'
 
 services:
-  
   api:
-    
     container_name: api
-    
     depends_on:
       - database
-    
     #
     #image: 
     # or
@@ -18,9 +14,7 @@ services:
       args:
         image_variant: development
     #
-    
     restart: "no"
-    
     #
     # Uncomment to override the service container's
     # default command and entrypoint for debugging
@@ -28,7 +22,6 @@ services:
     #entrypoint: /bin/bash # podman exec -i
     #tty: true             # podman exec -t
     #
-    
     env_file: ./env/api.env
     environment: # Override default dev envvars from the env_file here
       # Set this envvar to true to create the database table schemas
@@ -52,12 +45,9 @@ services:
       - ./api/src/:/usr/src/app/:Z
     
   app:
-    
     container_name: app
-    
     depends_on:
       - api
-    
     #
     #image: 
     # or
@@ -67,9 +57,7 @@ services:
       args:
         image_variant: development
     #
-    
     restart: "no"
-    
     #
     # Uncomment to override the service container's
     # default command and entrypoint for debugging
@@ -77,11 +65,9 @@ services:
     #entrypoint: /bin/bash # podman exec -i
     #tty: true             # podman exec -t
     #
-    
     env_file: ./env/app.env
     #environment: # Override default dev envvars from the env_file here
     #  OVERRIDE_ENVVARS_HERE=sample
-    
     volumes:
       # Source code volume for live development from the host
       #
@@ -89,14 +75,10 @@ services:
       #       code that comes pre-built with this image variant
       - ./app/src/:/usr/src/app/:Z
     
-  
   database:
     container_name: database
-    
     image: mariadb:lts # TODO: Pull and manage this image from our private container registry
-    
     restart: "no"
-    
     #
     # Uncomment to override the service container's
     # default command and entrypoint for debugging
@@ -104,12 +86,9 @@ services:
     #entrypoint: /bin/bash # podman exec -i
     #tty: true             # podman exec -t
     #
-    
-    env_file: ./env/database.env
-      
+    env_file: ./env/database.env 
     #environment: # Override default dev envvars from the env_file here
     #  OVERRIDE_ENVVARS_HERE=sample
-    
     volumes:
       # Database conf files
       - ./database/conf.d/mysql.cnf:/etc/mysql/conf.d/mysql.cnf:Z
@@ -123,21 +102,16 @@ services:
       
       # Volume-out database data to the host
       - ./database/dbdata:/var/lib/mysql/:Z
-    
     ports:
       - 3306:3306
-      
+  
   reverse-proxy:
     container_name: reverse-proxy
-    
     depends_on:
       - api
       - app
-    
     image: nginx:stable # TODO: Pull and manage this image from our private container registry
-    
     restart: "no"
-    
     #
     # Uncomment to override the service container's
     # default command and entrypoint for debugging
@@ -145,18 +119,15 @@ services:
     #entrypoint: /bin/bash # podman exec -i
     #tty: true             # podman exec -t
     #
-    
     env_file: ./env/reverse-proxy.env
     #environment: # Override default dev envvars from the env_file here
     #  OVERRIDE_ENVVARS_HERE=sample
-    
     volumes:
       # Nginx conf files
       - ./reverse-proxy/nginx.conf:/etc/nginx/nginx.conf:Z
       
       # Nginx Logs
       - ./reverse-proxy/logs/:/var/log/nginx/:Z
-    
     ports:
       - 80:80     # App http server
       - 4321:4321 # Api http server

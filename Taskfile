@@ -351,15 +351,15 @@
             # otherwise, the container stack will be upped, and both argsLists will be passed to that command
             
             # Assume the first set of args are targetContainers
-            local targetContainers="$argsList1"
+            local targetContainers=("${argsList1[@]}")
             local validTargetContainers=()
             
-            for targetContainer in "$targetContainers"; do
+            for targetContainer in "${targetContainers[@]}"; do
                 
                 validateContainer "$targetContainer"
                 # If validation was successful, add the container to the set of validTargetContainers for processing;
                 if [[ "$?" -eq 0 ]]; then
-                    validTargetContainers+="$targetContainer"
+                    validTargetContainers+=("$targetContainer")
                 else # otherwise, indicate its invalidity and omit it from the list of validTargetContainers
                     error "Invalid container: $targetContainer"
                 fi
@@ -369,7 +369,7 @@
                 
                 # Valid targetContainers found;
                 # gather args and compose-start
-                local commandArgs="$argsList2"
+                local commandArgs="${argsList2[@]}"
                 podman-compose start "${validTargetContainers[@]}" "${commandArgs[@]}"
                 return "$?"
                 
@@ -445,37 +445,64 @@
     ########
     #
     # Note: The -t option in the compose-down command can
-    #       be used to forcibly SIGKILLs the containers a
+    #       be used to forcibly SIGKILL the containers in
     #       specified number of seconds after the initial
     #       SIGTERM command is issued
     #
         
         function down {
             local args=("$@")
-            local targetContainer="${args[0]}" # TODO: Support multiple containers
             
-            # Check if a targetContainer is supplied;
-            # otherwise, all containers will be downed
-            if [[ -n "$targetContainer" ]] then
+            # Short circut no args to compose-down
+            if [[ -z "${args[@]}" ]]; then
+                podman-compose down "${args[@]}"
+                return "$?"
+            fi
+            
+            local separatorHasBeenFound=false
+            
+            local argsList1=() # targetContainer args
+            local argsList2=() # args for the command
+            
+            for currentArg in "${args[@]}"; do
+                [[ "$currentArg" == '--' ]]
+                local argIsSeperator="$?"
+                
+                if [[ "$separatorHasBeenFound" = false && "$argIsSeperator" -eq 0 ]]; then
+                    separatorHasBeenFound=true
+                elif [[ "$separatorHasBeenFound" = false ]]; then
+                    # No seperator yet; arg belongs in the first bucket
+                    argsList1+=("$currentArg")
+                else
+                    # Seperator found; arg belongs in the second bucket
+                    argsList2+=("$currentArg")
+                fi
+            done
+            
+            # Assume the first set of args are targetContainers
+            local targetContainers=("${argsList1[@]}")
+            local validTargetContainers=()
+            
+            for targetContainer in "${targetContainers[@]}"; do
                 
                 validateContainer "$targetContainer"
-                # Check if a validation error occurred
-                if [[ "$?" -ne 0 ]]; then
-                    error "Error! Invalid container: $targetContainer"
-                    error "Valid containers: ${containers[*]}"
-                    
-                    return "$?"
+                # If validation was successful, add the container to the set of validTargetContainers for processing;
+                if [[ "$?" -eq 0 ]]; then
+                    validTargetContainers+=("$targetContainer")
+                else # otherwise, indicate its invalidity and omit it from the list of validTargetContainers
+                    error "Invalid container: $targetContainer"
                 fi
-                # "Shift out" the targetContainer arg from the list of args
-                args=("${args[@]:1}")
-                
-                podman-compose down "$targetContainer" "${args[@]}"
+            done
+            
+            if (( ${#validTargetContainers[@]} != 0 )); then
+                local commandArgs="${argsList2[@]}"
+                podman-compose down "${validTargetContainers[@]}" "${commandArgs[@]}"
                 return "$?"
                 
             else
                 
-                # Down the stack
-                podman-compose down "${args[@]}"
+                argsList1+=("${argsList2[@]}")
+                podman-compose down "${argsList1[@]}"
                 return "$?"
                 
             fi
@@ -511,9 +538,8 @@
     ###########
         
         function restart {
-            stop
-            down
-            start #TODO: Use alias 'up' when it works
+            # TODO: Use alias 'up' for start task when aliases are working
+            stop && down -- -t 0 && start
             return "$?"
         }
     

@@ -3,20 +3,30 @@
 #       can still work. For now, just using attr.Type instead of attr.type...
 
 class attrs(dict):
+    """
+    Manage dict key-values using class attribute paths
+    """
+    
     def __getattr__(self, name):
+        """
+        Get the value of a given attr key-pathname
+        """
+        
         keys = name.split('.')
         value = self
         path = []
         
+        # Traverse through the dict key-path getting the next value
+        # until the final attr key-value from the key-path is retrieved
         for key in keys:
             if isinstance(value, dict) and key in value:
                 value = value[key]
                 path.append(key)
             else:
-                object_name = getattr(self, '__name__', self.__class__.__name__)
+                instance_name = getattr(self, '__name__', self.__class__.__name__)
                 attr_path = '.'.join(path)
                 
-                raise AttributeError(f"'{object_name}.{attr_path}' has no attribute key '{key}'")
+                raise AttributeError(f"'{instance_name}.{attr_path}' has no attribute key '{key}'")
         
         return value
     
@@ -43,10 +53,10 @@ class attrs(dict):
                 path.append(key)
             
             else:
-                object_name = getattr(self, '__name__', self.__class__.__name__)
+                instance_name = getattr(self, '__name__', self.__class__.__name__)
                 attr_path = '.'.join(path)
                 
-                raise AttributeError(f"'{object_name}.{attr_path}' has no attribute key '{key}'")
+                raise AttributeError(f"'{instance_name}.{attr_path}' has no attribute key '{key}'")
         
         del attr[keys[-1]]
     

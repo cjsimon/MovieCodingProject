@@ -111,11 +111,6 @@ jobs:
         run: |
           podman build -t ${{ needs.define_registry_variables.outputs.sha_image_url }} -f ${{ github.event.inputs.containerfile_path }} .
           podman tag ${{ needs.define_registry_variables.outputs.sha_image_url }} ${{ needs.define_registry_variables.outputs.branch_image_url }}
-    inputs:
-      container_name:
-        description: The name of the container
-        required: true
-        default: ${{ github.event.inputs.container_name }}
   
   push_container:
     if: ${{ inputs.run_push_container }}
@@ -134,8 +129,3 @@ jobs:
             podman tag ${{ needs.define_registry_variables.outputs.outputs.vars.sha_image_url }} ${{ needs.define_registry_variables.outputs.outputs.vars.latest_image_url }}
             podman push ${{ needs.define_registry_variables.outputs.outputs.vars.latest_image_url }}
           fi
-    inputs:
-      container_name:
-        description: The name of the container
-        required: true
-        default: ${{ github.event.inputs.container_name }}
