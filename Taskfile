@@ -378,7 +378,7 @@
                 # No valid targetContainers to start supplied;
                 # compose-up instead, using all supplied args
                 argsList1+=("${argsList2[@]}")
-                podman-compose up "${args[@]}"
+                podman-compose up "${argsList1[@]}"
                 return "$?"
                 
             fi
@@ -539,7 +539,12 @@
         
         function restart {
             # TODO: Use alias 'up' for start task when aliases are working
-            stop && down -- -t 0 && start
+            #
+            # Note: We're using the pod rm command instead of downing the
+            #       stack with compose-down for the time being due to a bug:
+            #       https://github.com/containers/podman-compose/issues/921
+            #
+            stop && podman pod rm --force --ignore --time 0 && start
             return "$?"
         }
     
