@@ -38,8 +38,8 @@ class Routes:
     # TODO: Create appropriate routes according to the external api.
     #       Don't forget to whitelist their ip as a firewall egress rule
     #
-    @blueprint.route('/search', methods = ['POST'])
-    def handle_search_endpoint():
+    @blueprint.route('/movies/search', methods = ['POST'])
+    def handle_search_endpoint(): # Get Movies
         if request.method != 'POST':
             return 'Method Not Allowed', 405
         
@@ -56,8 +56,8 @@ class Routes:
         
         response = connection.getresponse()
     
-    @blueprint.route('/image', methods = ['POST'])
-    def handle_image_endpoint():
+    @blueprint.route('/movie/image', methods = ['POST'])
+    def handle_image_endpoint(): # Get Movie Image
         if request.method != 'POST':
             return 'Method Not Allowed', 405
         
@@ -79,10 +79,10 @@ class Routes:
     #       favorite button one by one. Maybe can do this on the frontend for now, but
     #       would be risky if the user's session ends. Should be done in the app backend
     #
-    @blueprint.route('/movies/save', methods = ['POST'])
-    def saveMovies(): # TODO: Should accept saving multiple movies
-                      #       I'm not sure yet if the frontend will
-                      #       be sending more than one at a time, however
+    @blueprint.route('/<user_id>/movies/save', methods = ['POST'])
+    def saveFavoriteMovies(): # TODO: Should accept saving multiple movies
+                              #       I'm not sure yet if the frontend will
+                              #       be sending more than one at a time, however
         
         if request.method != 'POST':
             return 'Method Not Allowed', 405
@@ -106,7 +106,7 @@ class Routes:
             
             return 'Saved', 200
     
-    @blueprint.route('/movies/<user_id>', methods = ['POST'])
+    @blueprint.route('/<user_id>/movies/favorites', methods = ['POST'])
     def getFavoriteMovies(user_id):
         if request.method != 'POST':
             return 'Method Not Allowed', 405

@@ -109,7 +109,7 @@ Next, start the compose stack, which spins up the container services on your hos
 ```
 ***Note:** The `restart` task attempts to compose-`stop` and `down` the existing stack, then `up`s the compose stack.*
 
-The WebApp should now be accessible on [`http://localhost:80`](http://localhost:80), or [`127.0.0.1:80`](127.0.0.1:80)
+The WebApp should now be accessible on [`http://localhost:80`](http://localhost:80), or [`127.0.0.1:80`](127.0.0.1:80), and the WebApi on port `4321`. See the [Internal API docs](./api/README.md) in the api service README for available endpoints
 
 ##### Local Troubleshooting
 
