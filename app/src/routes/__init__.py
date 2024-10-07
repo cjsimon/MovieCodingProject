@@ -29,6 +29,10 @@ class Routes:
     
     """
     The API for the MovieManager project
+    
+    TODO: Investigate being able to instance blueprints
+          so this can be injected into the instance
+          instead of all instances relying on this global
     """
     api = Internal_API()
     
@@ -100,7 +104,7 @@ class Routes:
             return 'Method Not Allowed', 405
     
     def process_search_request(request):
-        search = api.endpoint.search
+        search = Routes.api.endpoints.search
         
         # The api search endpoint params happen to be the same as these post params
         search.params.imdb_id           = request.form.get('imdb_id')
@@ -109,7 +113,7 @@ class Routes:
         search.params.release_year      = request.form.get('release_year')
         search.params.plot_length       = request.form.get('plot_length')
         
-        search_response = api.exec(search).getresponse()
+        search_response = Routes.api.exec(search).getresponse()
         
         # TODO: Look into how expensive it is to pass whole responses like this.
         #       It would likely be much cheaper to do the work inline here instead
@@ -119,7 +123,7 @@ class Routes:
         pass #TODO
     
     def process_image_request(request):
-        image = api.endpoint.image
+        image = Routes.api.endpoints.image
         
         # The api image endpoint params happen to be the same as these post params
         image.params.imdb_id           = request.form.get('imdb_id')

@@ -1,3 +1,4 @@
+import os
 import datetime
 import json
 import requests
@@ -18,6 +19,10 @@ class Routes:
     
     """
     The external API to make outbound calls against
+    
+    TODO: Investigate being able to instance blueprints
+          so this can be injected into the instance
+          instead of all instances relying on this global
     """
     omdb = OMDb_API()
     
@@ -38,7 +43,7 @@ class Routes:
         if request.method != 'POST':
             return 'Method Not Allowed', 405
         
-        endpoint = omdb.endpoint.search
+        endpoint = Routes.omdb.endpoints.search
         
         endpoint.params.apikey = os.environ.get('APPLICATION_OMDBAPI_KEY')
         endpoint.params.i      = request.form.get('imdb_id')
@@ -47,7 +52,7 @@ class Routes:
         endpoint.params.y      = request.form.get('release_year')
         endpoint.params.plot   = request.form.get('plot_length')
         
-        connection = omdb.exec(endpoint)
+        connection = Routes.omdb.exec(endpoint)
         
         response = connection.getresponse()
     
@@ -56,7 +61,7 @@ class Routes:
         if request.method != 'POST':
             return 'Method Not Allowed', 405
         
-        endpoint = omdb.endpoint.image
+        endpoint = Routes.omdb.endpoints.image
         
         endpoint.params.apikey = os.environ.get('APPLICATION_OMDBAPI_KEY')
         endpoint.params.s      = request.form.get('movie_title_query')
@@ -64,7 +69,7 @@ class Routes:
         endpoint.params.y      = request.form.get('release_year')
         endpoint.params.page   = request.form.get('page')
         
-        connection = omdb.exec(endpoint)
+        connection = Routes.omdb.exec(endpoint)
         
         response = connection.getresponse()
     
@@ -111,7 +116,7 @@ class Routes:
             """
             TODO: Get User's Movies with a JOIN on Users_Movies for a given user id, using the model
                   Here's the sql equivalent operation:
-            
+                  
                   SELECT *
                       FROM Moive
                   LEFT OUTER JOIN Users_Movies
