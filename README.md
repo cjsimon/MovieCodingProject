@@ -26,14 +26,43 @@ If working on Windows, you need to be using [Git for Windows's GitBash](https://
 - [asdf](https://asdf-vm.com/guide/getting-started.html#getting-started) Makes it easy to manage varying versions of various OS Level binaries. You can use it to install the specific Podman, OpenTofu, DirEnv, Python and PipEnv versions that maybe required for this project alongside other versions of those tools for other projects.
 - [DirEnv](https://direnv.net/docs/installation.html) is supported for optional, convenient, pre-defined directory-level bash functions and aliases, to further simplify project level tasks and processes. (*Note: You may replace all `./Taskfile` calls with the `task` or `run` project-level aliases if DirEnv is activated in the projet directory*)
 - [Podman Desktop](https://podman-desktop.io/downloads) for container management from a GUI if preferred over using a CLI
-- [Visual Studio Code](https://code.visualstudio.com/Download) with code formatting and debugging pre-setup, so long as [the recommended extensions](.vscode/extensions.json) are installed. See: `.vscode/extensions.json`
+- [Visual Studio Code](https://code.visualstudio.com/Download) with code formatting and debugging pre-setup, so long as [the recommended extensions](.vscode/extensions.json) are installed. See: `.vscode/extensions.json`. ***Note:** Recommended extensions yet to be added*
 
 ### Building the Project
 
-First, you'll need to authenticate to the project's private container registry:  
+***WIP:** Private container registry yet to be deployed. Resort to building and running locally for now*
+
+First, you
+'ll need to authenticate to the project's private container registry:  
 `podman login registry.digitalocean.com`
 
 #### Building and Running Locally
+
+From the root project directory, make a working copy of the template compose stack to use for local development:
+
+```bash
+cp compose.template.yml compose.yml
+```
+
+***NOTE:** Only the template compose stack is checked into git*
+
+In your working compose stack, set the `APPLICATION_OMDBAPI_KEY` for the api service to use, under the envvar. :  
+
+```yml
+serivces:
+  api:
+    env_file: ./env/api.env
+      environment: # Overrides env_file defaults
+        
+        # NOTE: If this is your first run of the service stack,
+        #       you may also want to temporarily set the below
+        #       APPLICATION_INIT_DATABASE envvar flag to 'true'
+        #       to generate the sql tables from the app models
+        APPLICATION_INIT_DATABASE: true
+        
+        # Set this envvar with your OMDb API Key
+        APPLICATION_OMDBAPI_KEY: <YOUR_KEY_HERE>
+```
 
 For local development, you have the option of building the service containers on your host, or using the prebuilt development image variants. By default, the prebuilt development image variants are fetched from the project's private container registry.
 

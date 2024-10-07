@@ -6,7 +6,7 @@ services:
     depends_on:
       - database
     #
-    #image: 
+    #image: # TODO: Pull and manage this image from our private container registry
     # or
     build:
       context: ./api/
@@ -19,11 +19,16 @@ services:
     # Uncomment to override the service container's
     # default command and entrypoint for debugging
     #command: ""
-    #entrypoint: /bin/bash # podman exec -i
-    #tty: true             # podman exec -t
+    #entrypoint: /bin/bash # podman run -i
+    #tty: true             # podman run -t
     #
     env_file: ./env/api.env
-    environment: # Override default dev envvars from the env_file here
+    environment: # Override default dev env_file envvars here
+      APPLICATION_ENABLE_DEBUGGER: true
+      # On app startup, wait for the client to connect
+      # to the debuggable app before starting execution
+      APPLICATION_DEBUGGER_WAIT_FOR_CLIENT: false
+      
       # Set this envvar to true to create the database table schemas
       #
       # Note: Unless you're intending to recrate the database,
@@ -36,19 +41,23 @@ services:
       #       will persist database files on disk between runs
       #
       APPLICATION_INIT_DATABASE: false
+      
+      APPLICATION_OMDBAPI_KEY: YOUR_KEY_HERE
     volumes:
       # Source code volume for live development from the host
       #
       # Note: You may comment out this volume to use the src/
       #       code that comes pre-built with this image variant
       - ./api/src/:/usr/src/app/:Z
+    ports:
+      - 5678:1234 # For debugging
     
   app:
     container_name: app
     depends_on:
       - api
     #
-    #image: 
+    #image: # TODO: Pull and manage this image from our private container registry
     # or
     build:
       context: ./app/
@@ -61,18 +70,23 @@ services:
     # Uncomment to override the service container's
     # default command and entrypoint for debugging
     #command: ""
-    #entrypoint: /bin/bash # podman exec -i
-    #tty: true             # podman exec -t
+    #entrypoint: /bin/bash # podman run -i
+    #tty: true             # podman run -t
     #
     env_file: ./env/app.env
-    #environment: # Override default dev envvars from the env_file here
-    #  OVERRIDE_ENVVARS_HERE=sample
+    environment: # Override default dev env_file envvars here
+      APPLICATION_ENABLE_DEBUGGER: true
+      # On app startup, wait for the client to connect
+      # to the debuggable app before starting execution
+      APPLICATION_DEBUGGER_WAIT_FOR_CLIENT: false
     volumes:
       # Source code volume for live development from the host
       #
       # Note: You may comment out this volume to use the src/
       #       code that comes pre-built with this image variant
       - ./app/src/:/usr/src/app/:Z
+    ports:
+      - 5678:8080 # For debugging
     
   database:
     container_name: database
@@ -82,11 +96,11 @@ services:
     # Uncomment to override the service container's
     # default command and entrypoint for debugging
     #command: ""
-    #entrypoint: /bin/bash # podman exec -i
-    #tty: true             # podman exec -t
+    #entrypoint: /bin/bash # podman run -i
+    #tty: true             # podman run -t
     #
     env_file: ./env/database.env
-    #environment: # Override default dev envvars from the env_file here
+    #environment: # Override default dev env_file envvars here
     #  OVERRIDE_ENVVARS_HERE=sample
     volumes:
       # Database conf files
@@ -115,11 +129,11 @@ services:
     # Uncomment to override the service container's
     # default command and entrypoint for debugging
     #command: ""
-    #entrypoint: /bin/bash # podman exec -i
-    #tty: true             # podman exec -t
+    #entrypoint: /bin/bash # podman run -i
+    #tty: true             # podman run -t
     #
     env_file: ./env/reverse-proxy.env
-    #environment: # Override default dev envvars from the env_file here
+    #environment: # Override default dev env_file envvars here
     #  OVERRIDE_ENVVARS_HERE=sample
     volumes:
       # Nginx conf files
