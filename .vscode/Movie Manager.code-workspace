@@ -4,20 +4,26 @@
 			"name": "Project",
 			"path": "../"
 		},
-		/*
-		{
-			"name": "App",
-			"path": "../app/"
-		},
         {
 			"name": "Api",
 			"path": "../api/"
 		},
 		{
+			"name": "App",
+			"path": "../app/"
+		},
+        {
 			"name": "Database",
 			"path": "../database/"
 		},
-		*/
+        {
+			"name": "IaC",
+			"path": "../iac/"
+		},
+        {
+			"name": "Reverse Proxy",
+			"path": "../reverse-proxy/"
+		},
 	],
 	"settings": {},
 }

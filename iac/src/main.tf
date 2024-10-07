@@ -11,30 +11,34 @@ terraform {
 # MovieManager Project #
 ########################
   
-  ############################
-  # Shared Project Variables #
-  ############################
-    
-    variable "environment" { type = string }
-    variable "app_firewall_whitelist_ips" { type = list(string) }
+  ###################
+  # Input Variables #
+  ###################
   
-  ######################
-  # Provider Variables #
-  ######################
-    
-    ################
-    # DigitalOcean #
-    ################
+    ############################
+    # Shared Project Variables #
+    ############################
       
-      variable "do_token" { type = string }
+      variable "environment" { type = string }
+      variable "app_firewall_whitelist_ips" { type = list(string) }
+    
+    ######################
+    # Provider Variables #
+    ######################
+      
+      ################
+      # DigitalOcean #
+      ################
+        
+        variable "do_token" { type = string }
   
   ###################
   # Project Modules #
   ###################
     
-    #############
-    # Providers #
-    #############
+    ####################
+    # Provider Modules #
+    ####################
       
       # DigitalOcean
       module "moviemanager-digitalocean" {
@@ -44,3 +48,35 @@ terraform {
         do_token                   = "${var.do_token}"
         app_firewall_whitelist_ips = var.app_firewall_whitelist_ips
       }
+      
+      #######
+      # App #
+      #######
+        
+        module "moviemanager-app" {
+          source = "./app"
+        }
+      
+      #######
+      # Api #
+      #######
+        
+        module "moviemanager-api" {
+          source = "./api"
+        }
+      
+      ############
+      # Database #
+      ############
+        
+        module "moviemanager-database" {
+          source = "./database"
+        }
+      
+      ######################
+      # Container Registry #
+      ######################
+      
+        module "moviemanager-container-registry" {
+          source = "./container-registry"
+        }

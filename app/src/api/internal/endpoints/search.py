@@ -1,15 +1,8 @@
 def endpoint():
     return {
-        'host':   'http://www.omdbapi.com',
-        'route':  '/',
-        'method': 'GET',
+        'route':  '/search',
+        'method': 'POST',
         'params': {
-            'apikey': {
-                'desc':     'API key.',
-                'Type':     str,
-                'required': True,
-                #'value':   os.environ.get('APPLICATION_OMDBAPI_KEY'),
-            },
             'i': {
                 'desc':     'A valid IMDb ID (e.g. tt1285016)',
                 'Type':     int,
@@ -41,25 +34,6 @@ def endpoint():
                 'options':  ['short', 'full'],
                 'required': False,
                 #'value':   plot_length
-            },
-            'r': {
-                'desc':     'The data type to return.',
-                'Type':     str,
-                'required': False,
-                'options':  ['json', 'xml'],
-                'value':    'json',
-            },
-            'callback': {
-                'desc':     'JSONP callback name.',
-                'Type':     str,
-                'value':    None,
-                'required': False,
-            },
-            'v': {
-                'desc':     'API version (reserved for future use).',
-                'Type':     str,
-                'required': False,
-                'value':    None,
             },
         }
     }

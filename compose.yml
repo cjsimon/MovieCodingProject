@@ -36,7 +36,6 @@ services:
       #       will persist database files on disk between runs
       #
       APPLICATION_INIT_DATABASE: false
-      
     volumes:
       # Source code volume for live development from the host
       #
@@ -86,7 +85,7 @@ services:
     #entrypoint: /bin/bash # podman exec -i
     #tty: true             # podman exec -t
     #
-    env_file: ./env/database.env 
+    env_file: ./env/database.env
     #environment: # Override default dev envvars from the env_file here
     #  OVERRIDE_ENVVARS_HERE=sample
     volumes:

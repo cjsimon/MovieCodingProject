@@ -5,12 +5,12 @@ metadata:
 data:
   reverse-proxy.conf: |
     events { }
-
+    
     http {
         upstream api {
             server api-service:80;
         }
-
+        
         server {
             listen 80;
             location / {

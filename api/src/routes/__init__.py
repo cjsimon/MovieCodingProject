@@ -1,9 +1,10 @@
-from api.omdb import OMDb_API
-from flask import Blueprint, render_template
-
 import datetime
 import json
 import requests
+
+from api.omdb import OMDb_API
+
+from flask import Blueprint, render_template, request
 import sqlalchemy
 
 class Routes:
@@ -16,7 +17,7 @@ class Routes:
     blueprint = Blueprint('api', __name__)
     
     """
-    The internal API to make outbound calls against
+    The external API to make outbound calls against
     """
     omdb = OMDb_API()
     
@@ -33,8 +34,8 @@ class Routes:
     #       Don't forget to whitelist their ip as a firewall egress rule
     #
     @blueprint.route('/search', methods = ['POST'])
-    def search():
-        if request.method is not 'POST':
+    def handle_search_endpoint():
+        if request.method != 'POST':
             return 'Method Not Allowed', 405
         
         endpoint = omdb.endpoint.search
@@ -51,8 +52,8 @@ class Routes:
         response = connection.getresponse()
     
     @blueprint.route('/image', methods = ['POST'])
-    def image():
-        if request.method is not 'POST':
+    def handle_image_endpoint():
+        if request.method != 'POST':
             return 'Method Not Allowed', 405
         
         endpoint = omdb.endpoint.image
@@ -66,7 +67,6 @@ class Routes:
         connection = omdb.exec(endpoint)
         
         response = connection.getresponse()
-        pass
     
     # TODO: For a given user, group saves done close together into a single transaction,
     #       instead of having multiple seperate inserts into the database in succession
@@ -79,7 +79,7 @@ class Routes:
                       #       I'm not sure yet if the frontend will
                       #       be sending more than one at a time, however
         
-        if request.method is not 'POST':
+        if request.method != 'POST':
             return 'Method Not Allowed', 405
         
         with self.database.engine.connect() as connection:
@@ -101,18 +101,28 @@ class Routes:
             
             return 'Saved', 200
     
-    @blueprint.route('/movies/get', methods = ['POST'])
-    def getFavoriteMovies():
-        if request.method is not 'POST':
+    @blueprint.route('/movies/<user_id>', methods = ['POST'])
+    def getFavoriteMovies(user_id):
+        if request.method != 'POST':
             return 'Method Not Allowed', 405
         
         with self.database.engine.connect() as connection:
-            pass
-            # TODO: Get User_Movies for a given user id, using the model
-            #session.add(Movie)
+            
+            """
+            TODO: Get User's Movies with a JOIN on Users_Movies for a given user id, using the model
+                  Here's the sql equivalent operation:
+            
+                  SELECT *
+                      FROM Moive
+                  LEFT OUTER JOIN Users_Movies
+                      ON Movie.id = Movies_Users.movie_id
+                      AND Movies_Users.user_id = {user_id}
+            """
             
             # TODO: Iterate over movies and return appropriate frontend data
             #for movie in movies:
             #    print(f' - { movie }')
             
             #return movie_data, 200
+            
+            pass

@@ -544,7 +544,9 @@
             #       stack with compose-down for the time being due to a bug:
             #       https://github.com/containers/podman-compose/issues/921
             #
-            stop && podman pod rm --force --ignore --time 0 && start
+            stop
+            podman pod rm --force --ignore --time 0 pod_moviecodingproject
+            start
             return "$?"
         }
     

@@ -1,7 +1,7 @@
 import os, sys
 
-from flask_app import create_app, Environment
-from flask_app.libs import str2bool
+from libs.flask_app import create_app, Environment
+from libs import str2bool
 
 APP_NAME          = os.environ['APPLICATION_NAME']
 APP_ENV           = os.environ['APPLICATION_ENVIRONMENT']

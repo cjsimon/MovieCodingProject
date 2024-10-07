@@ -1,4 +1,4 @@
-from flask_app.serializer import Serializer
+from libs.flask_app import Serializer
 from sqlalchemy import Column, Integer, String
 from sqlalchemy import PrimaryKeyConstraint
 
@@ -13,16 +13,14 @@ def init(Base):
         id       = Column(Integer,     nullable=False)
         title    = Column(String(120), nullable=False, unique=False)
         year     = Column(String,      nullable=True,  unique=False) # Using String as workaround; the year shouldn't auto-increment.
-                                                                    # See: https://github.com/sqlalchemy/sqlalchemy/discussions/10921
-                                                                    # As a positive, the year could now support parenthesis and extras.
+                                                                     # See: https://github.com/sqlalchemy/sqlalchemy/discussions/10921
+                                                                     # As a positive, the year could now support parenthesis and extras.
         rating   = Column(Integer,     nullable=True,  unique=False)
         plot     = Column(String(120), nullable=True,  unique=False)
         director = Column(String(120), nullable=True,  unique=False)
         actors   = Column(String(120), nullable=True,  unique=False) # TODO: Construct actors on the fly with db table?
-                                                                    #       Could also do this for the Movies as well
-        PrimaryKeyConstraint(id)
-        PrimaryKeyConstraint(title)
-        PrimaryKeyConstraint(year)
+                                                                     #       Could also do this for the Movies as well
+        PrimaryKeyConstraint(id, title, year)
         
         def __init__(self, title=None, year=None, rating=None, plot=None, director=None, actors=None):
             """

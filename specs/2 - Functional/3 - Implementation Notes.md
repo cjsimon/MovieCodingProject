@@ -26,7 +26,7 @@ I've could've also tried porting the Taskfile to python since most of the projec
 
 I found [this list of CI tools](https://github.com/ligurio/awesome-ci) and narrowed down to open source ones. I've used Jenkins in the past at a previous job, and I wanted to try a different one to compare it against. I was going to deploy an load-balanced auto-scale GitLab runner cluster to run jobs on, but I decided it might be easier in the short-term to try and learn how GitHub actions worked. I've actually used GitLab runners before, so it was nice getting to try a new tool to compare both Jenkins and GitLab against.
 
-I originally wrote my pipelines as GitLab Workflows, but after I decided to switch to GitHub Actions, instead of porting the workflow from scratch without any knowledge of GitHub Actions, where I would have to potentially sift through docs trying to satisfy functionality with equivalent mechanisms for whole use cases implemented in the GitLab Workflows, I decided to test ChatGPT's capabilities, or if it could at least point me in the right direction. Lo and behold, it was able to convert the Workflow to an Action upfront. Very cool! It definitely made learning how to use Actions faster and easier. After studying the generated file, I used the docs to implement more feature requirements on top of it.
+I originally wrote my pipelines as GitLab Workflows, but after I decided to switch to GitHub Actions, instead of porting the workflow from scratch without any knowledge of GitHub Actions, where I would have to potentially sift through docs trying to satisfy functionality with equivalent mechanisms for whole use cases implemented in the GitLab Workflows, I decided to test ChatGPT's capabilities, or if it could at least point me in the right direction. Lo and behold, it was able to convert the Workflow to an Action upfront. Very cool! It definitely made learning how to use Actions faster and easier. After studying the generated file, I used the docs to implement more feature requirements on top of it. So far, I haven't enjoyed working with GitHub Actions as much as I have GitLab Workflows and Jenkins; I don't think I would even prefer using Forgejo's open source github-like alternative actions runner. GitLab Workflows are simpler to use and implement in my opinion, and their UI for pipelines is excellent in it's simplicity without any learning curve. If I had to do it over, I would stick to using GitLab workflows, or better yet, get reaquainted with Jenkins or one of the other listed Free Open Source Software (FOSS) "Awesome CI" tools, compared to the GitLab's Freemium OSS model.
 
 ## Testing
 
@@ -38,7 +38,11 @@ I've used Selenium in the past, and, as with the CI tool, I wanted to try someth
 
 According to typical hardened image standards and best practices, you shouldn't be using the root user to install, manage and run project-level dependencies, but a project-level user, like Apache for php containers, or some python user for a python runtime, etc. I didn't have time to look into this. See the "User and group id", and "Running nginx as a non-root user" sections of the docs for the official [nginx docker image](https://hub.docker.com/_/nginx/), for example.
 
-### App
+### App Dependencies
+
+Both python images share the same flask_app library; it should be shared across apps instead of attempting to manage keeping both in sync by hand... Just like how a private container registry needs to be used to host custom images, and even private copies of the existing public images, a private package store should be used, not just for shared dependencies, but for all project-level dependencies, so there is another control layer on what gets pulled into the apps—Understandably, those who were victim to the [npm left-pad incident](https://en.wikipedia.org/wiki/Npm_left-pad_incident) were at fault for not doing exactly this, or potentially generally not monitoring and/or vetting pulled-in dependencies well enough.
+
+### App Service
 
 #### Frontend
 
@@ -52,11 +56,11 @@ Loading module from “http://127.0.0.1/static/libraries/JSTemplates/JSTemplates
 
 I tried disabling flask's CSRF mode to see if that was the culprit, but maybe it's just the development server itself. I figured this would work as expected if hosting with a reverse proxy such as NGINX, instead of hosting with the development server. The development server pointing to the reverse-proxy didn't seem to make a difference. I just switched to using a production-ready wsgi python server to try with the reverse-proxy, and I'm still seeing the same issue. Might need more investigation before I can work on the frontend.
 
-### API
+### API Service
 
-#### Endpoint Test Suite
+#### Internal API, and OMdb Endpoint Test Suite
 
-Probably the next step before writing `fetch` requests from the frontend to invoke the api would be to create an endpoint test suite. I've used Postman Collections in the past with parameters and secrets for different environments, and had the suite run as a prerequisite test job on CI. I would've liked to try something new, and open source.
+Probably the next step before writing `fetch` requests and submitting POST forms from the frontend to invoke the api would be to create an endpoint test suite. I've used Postman Collections in the past with parameters and secrets for different environments, and had the suite run as a prerequisite test job on CI. I would've liked to try something new, and open source. [Hurl](https://hurl.dev/) seems like a great option, with [CI support](https://hurl.dev/docs/tutorial/ci-cd-integration.html#cicd-integration).
 
 #### Models
 
@@ -65,6 +69,8 @@ The models should probably eventually inherit a base model class, which can cont
 ### Database
 
 #### Database Schema
+
+There seems to be a general issue with the SQLAlchemy ORM Models not correctly representing the expected schema. I might've made an implementation mistake with the library. I could've resorted to bare sql to create the table structure, with the cascades and all, but it wouldn't be as portable, and it would've been redundant since I'm already using the models anyways. It's easier to maintain migrations using an ORM.
 
 ##### User
 

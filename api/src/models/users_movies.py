@@ -1,4 +1,4 @@
-from flask_app.serializer import Serializer
+from libs.flask_app import Serializer
 from sqlalchemy import Column, Integer
 from sqlalchemy import PrimaryKeyConstraint, ForeignKeyConstraint
 
