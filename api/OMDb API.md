@@ -1,6 +1,6 @@
 # OMDb API
 
-Up to date as of Sept 29th, 2024. Refer to latest usage docs here: `https://www.omdbapi.com/#usage`
+Up to date as of Sept 29th, 2024. Refer to latest usage docs here: https://www.omdbapi.com/#usage
 
 ## Endpoints
 
