@@ -26,14 +26,13 @@ If working on Windows, you need to be using [Git for Windows's GitBash](https://
 - [asdf](https://asdf-vm.com/guide/getting-started.html#getting-started) Makes it easy to manage varying versions of various OS Level binaries. You can use it to install the specific Podman, OpenTofu, DirEnv, Python and PipEnv versions that maybe required for this project alongside other versions of those tools for other projects.
 - [DirEnv](https://direnv.net/docs/installation.html) is supported for optional, convenient, pre-defined directory-level bash functions and aliases, to further simplify project level tasks and processes. (*Note: You may replace all `./Taskfile` calls with the `task` or `run` project-level aliases if DirEnv is activated in the projet directory*)
 - [Podman Desktop](https://podman-desktop.io/downloads) for container management from a GUI if preferred over using a CLI
-- [Visual Studio Code](https://code.visualstudio.com/Download) with code formatting and debugging pre-setup, so long as [the recommended extensions](.vscode/extensions.json) are installed. See: `.vscode/extensions.json`. ***Note:** Recommended extensions yet to be added*
+- [Visual Studio Code](https://code.visualstudio.com/Download) with code formatting and debugging pre-setup, so long as [the recommended extensions](.vscode/extensions.json) are installed. See: `.vscode/extensions.json`.
 
 ### Building the Project
 
-***WIP:** Private container registry yet to be deployed. Resort to building and running locally for now*
+***WIP:** Private container registry yet to be deployed. Please resort to "Building and Running Locally" instead, for now*
 
-First, you
-'ll need to authenticate to the project's private container registry:  
+First, you'll need to authenticate to the project's private container registry:  
 `podman login registry.digitalocean.com`
 
 #### Building and Running Locally
@@ -64,11 +63,11 @@ serivces:
         APPLICATION_OMDBAPI_KEY: <YOUR_KEY_HERE>
 ```
 
-For local development, you have the option of building the service containers on your host, or using the prebuilt development image variants. By default, the prebuilt development image variants are fetched from the project's private container registry.
+For local development, you have the option of building the service containers on your host, or using the prebuilt development image variants (***WIP:* Yet to be implemented. Build locally for now**). By default, the prebuilt development image variants are [**WIP: eventually to be**] fetched from the project's private container registry.
 
 If you would like to build a container locally using the Containerfile instead of pulling down a prebuilt image, you will need to edit the `compose.yml` stack located in the root project directory.
 
-Comment-out the `image` block, and uncomment the `build` block of the service container you want to build:  
+Comment-out the `image` block, and uncomment the `build` block of the service container you want to build. (***NOTE:** As of now, due to registry images being WIP, this should already be done*):  
 
 ```yml
 app:
@@ -100,7 +99,7 @@ CONTAINER='app' # or: 'api', or: 'database', etc
 ./Taskfile build "$CONTAINER"
 ```
 
-***Note:** You may also run the appropriate GitHub Action to trigger a build for one of the services. Each service has four different image variants corresponding to the environment the container is intended to run on: `testing`, `development`, `staging` and `production`.*
+***Note:** You may also run the appropriate GitHub Action to trigger a build for one of the services (***WIP:*** GitHub Actions unfinished). Each service has four different image variants corresponding to the environment the container is intended to run on: `testing`, `development`, `staging` and `production`.*
 
 Next, start the compose stack, which spins up the container services on your host:  
 
@@ -109,7 +108,7 @@ Next, start the compose stack, which spins up the container services on your hos
 ```
 ***Note:** The `restart` task attempts to compose-`stop` and `down` the existing stack, then `up`s the compose stack.*
 
-The WebApp should now be accessible on [`http://localhost:80`](http://localhost:80), or [`127.0.0.1:80`](127.0.0.1:80), and the WebApi on port `4321`. See the [Internal API docs](./api/README.md) in the api service README for available endpoints
+The WebApp should now be accessible on [`http://localhost:80`](http://localhost:80), or [`127.0.0.1:80`](127.0.0.1:80), and the WebApi on port `4321`. See the [Internal API docs](./api/README.md) in the `api` service `README` for available endpoints
 
 ##### Local Troubleshooting
 
@@ -181,6 +180,12 @@ CONTAINER='app' # or 'api', etc
 pipenv lock
 exit # Exit the container terminal session
 ```
+
+##### App Debugging
+
+***WIP:** Support for this feature has yet to be tested*
+
+The `app` and `api` services have remote debugging support enabled by default, exposed on ports `8080` and `1234` respectively. With the recommended python extensions installed, you may set breakpoints in VSCode, and launch one of the appropriate debug jobs under the "Run and Debug" tab.
 
 ##### Running Tests Locally
 
@@ -259,6 +264,8 @@ Unit tests also run as a prerequisite job before a container service is able to 
 
 ## Deployment
 
+***WIP:** IaC and Actions yet to be compleated*
+
 ### Deployment using GitHub Actions
 
 The more appropriate and safe way to kick-off a deploy is to trigger the GitHub Workflows for `build`ing, `test`ing, and `push`ing the service containers to the container registry, and then `deploy`ing the Infustructure as Code (IaC) for the target environment.
@@ -284,9 +291,9 @@ OpenTofu used the selected providers to generate the following execution plan. R
 ...
 ```
 
-Then, if everything is as expected, apply the changes to that pre-planned environment:  
+Then, if everything is as expected, apply the changes to that pre-planned environment. Since the `development.tfvars` were used during the `plan`ning phase in this example, the `apply` is in context of those values from that file:  
 
 ```bash
-# The var-file passed into tofu plan was set to 'development.tfvars', so these changes will be applied to the development environment
+# The var-file passed into tofu plan was set to 'development.tfvars', so these changes will be applied according to values from that file
 tofu apply
 ```
