@@ -1,6 +1,12 @@
 {
     "recommendations": [
-        "editorconfig.editorconfig"
-        
+        "editorconfig.editorconfig",
+        "gamunu.opentofu",
+        "gruntfuggly.todo-tree",
+        "jacobpfeifer.pfeifer-hurl",
+        "mateuszdrewniak.hurl-runner",
+        "mikestead.dotenv",
+        "ms-python.debugpy",
+        "ms-python.python",
     ]
 }
