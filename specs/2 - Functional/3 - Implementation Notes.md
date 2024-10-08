@@ -70,7 +70,7 @@ The models should probably eventually inherit a base model class, which can cont
 
 #### Database Schema
 
-There seems to be a general issue with the SQLAlchemy ORM Models not correctly representing the expected schema. I might've made an implementation mistake with the library. I could've resorted to bare sql to create the table structure, with the cascades and all, but it wouldn't be as portable, and it would've been redundant since I'm already using the models anyways. It's easier to maintain migrations using an ORM.
+I could've used an initdb sql file to create the initial table structures instead of using the api models, but it wouldn't be as portable, and it would've been redundant since I already make use of them in the api. It's easier to maintain migrations using an ORM. The api was having issues establishing a connection to the database container, even with the typical appropriate privileges to the user on the correct range of subnet IPs from what I can tell. Still troubleshooting this at the moment. See the database's `privileges.sql` initdb script.
 
 ##### User
 

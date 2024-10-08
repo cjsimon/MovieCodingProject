@@ -16,4 +16,5 @@ gunicorn         = "~=23.0"
 requests         = "~=2.32"
 
 [dev-packages]
+debugpy          = "*"
 pylint           = "~=3.3"
