@@ -110,6 +110,20 @@ Next, start the compose stack, which spins up the container services on your hos
 
 The WebApp should now be accessible on [`http://localhost:80`](http://localhost:80), or [`127.0.0.1:80`](127.0.0.1:80), and the WebApi on port `4321`. See the [Internal API docs](./api/README.md) in the `api` service `README` for available endpoints
 
+You can establish a connection to the database directly using the `database-connect` task, which spins up an ephemiral mariadb-client container to connect to the app mariadb database:  
+
+```bash
+./Taskfile database-connect
+```
+
+Alternativley, you can run the task command by hand:  
+
+```bash
+image='mariadb'
+
+podman run -it --rm "$image" mariadb --host host.containers.internal -P3306 --user movie_manager_user -ppass1234 --database MovieManager
+```
+
 ##### Local Troubleshooting
 
 ###### Troubleshooting Container Prematurley Crashing

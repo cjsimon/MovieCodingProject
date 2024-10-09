@@ -596,10 +596,21 @@
             
             for service in "${services[@]}"; do
                 pushd . >> /dev/null
+                    trap 'popd > /dev/null' SIGINT SIGABRT
                     cd "./$service/src/"
                     command pipenv lock "${args[@]}"
                 popd >> /dev/null
             done
+        }
+    
+    ####################
+    # database-connect #
+    ####################
+        
+        function database-connect {
+            local image='mariadb'
+            
+            command podman run -it --rm "$image" mariadb --host host.containers.internal -P3306 --user movie_manager_user -ppass1234 --database MovieManager
         }
     
     ########
@@ -617,6 +628,7 @@
             local tofu; tofu=$(which tofu); [[ "$?" -eq 0 ]] || return 1
             
             pushd . >> /dev/null
+                trap 'popd > /dev/null' SIGINT SIGABRT
                 cd ./iac/src/
                 command "$tofu" "${args[@]}"
             popd >> /dev/null
