@@ -70,6 +70,7 @@ jobs:
           DIGITALOCEAN_ACCESS_TOKEN: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
   
   define_registry_variables:
+    if: ${{ inputs.run_build_container || inputs.run_push_container }}
     runs-on: ubuntu-latest
     steps:
       # https://stackoverflow.com/questions/59810838/how-to-get-the-short-sha-for-the-github-workflow
@@ -97,8 +98,7 @@ jobs:
       # Expose defined registry variables
       # See: https://stackoverflow.com/questions/59175332/using-output-from-a-previous-job-in-a-new-one-in-a-github-action
       outputs: ${{ steps.define_registry_variables.outputs }}
-    
-      
+  
   build_container:
     if: ${{ inputs.run_build_container }}
     runs-on: ubuntu-latest
