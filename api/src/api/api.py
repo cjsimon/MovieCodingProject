@@ -32,7 +32,7 @@ class API:
         params_string = ''
         
         for param in params(depth=1):
-            param_string = _construct_urlparam(param)
+            param_string = construct_urlparam(param)
             
             if param_string:
                 params_string += param_string

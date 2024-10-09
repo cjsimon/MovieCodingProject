@@ -1,5 +1,5 @@
 version: '3'
-
+name: moviemanager
 services:
   api:
     container_name: api
@@ -13,6 +13,7 @@ services:
       dockerfile: Containerfile
       args:
         image_variant: development
+        src_dir: ${API_SOURCE_DIRECTORY} # API_SOURCE_DIRECTORY from ./.env file
     #
     restart: "no"
     #
@@ -48,12 +49,12 @@ services:
       #
       # Note: You may comment out this volume to use the src/
       #       code that comes pre-built with this image variant
-      - api-src:/usr/src/app/:Z
+      - api-src:${API_SOURCE_DIRECTORY}:Z # API_SOURCE_DIRECTORY from ./.env file
     ports:
       - 1234:5678 # For debugging
   
-  api-reverse-proxy:
-    container_name: api-reverse-proxy
+  api-proxy:
+    container_name: api-proxy
     depends_on:
       - api
     image: nginx:stable # TODO: Pull and manage this image from our private container registry
@@ -65,18 +66,18 @@ services:
     #entrypoint: /bin/bash # podman run -i
     #tty: true             # podman run -t
     #
-    env_file: ./env/api-reverse-proxy.env
+    env_file: ./env/api-proxy.env
     #environment: # Override default dev env_file envvars here
     #  OVERRIDE_ENVVARS_HERE=sample
     volumes:
-      # App source volume for proxy to serve files from
-      - api-src:/usr/src/app/:Z
+      # Read-only App source volume for proxy to serve files from
+      - api-src:/usr/src/app/:Z,ro
       
       # Nginx conf files
-      - ./api/reverse-proxy/nginx.conf:/etc/nginx/nginx.conf:Z
+      - ./api/proxy/nginx.conf:/etc/nginx/nginx.conf:Z
       
       # Nginx Logs
-      - ./api/logs/reverse-proxy/:/var/log/nginx/:Z
+      - ./api/logs/proxy/:/var/log/nginx/:Z
   
   app:
     container_name: app
@@ -90,6 +91,7 @@ services:
       dockerfile: Containerfile
       args:
         image_variant: development
+        src_dir: ${APP_SOURCE_DIRECTORY} # APP_SOURCE_DIRECTORY from ./.env file
     #
     restart: "no"
     #
@@ -110,12 +112,12 @@ services:
       #
       # Note: You may comment out this volume to use the src/
       #       code that comes pre-built with this image variant
-      - app-src:/usr/src/app/:Z
+      - app-src:${APP_SOURCE_DIRECTORY}:Z # APP_SOURCE_DIRECTORY from ./.env file
     ports:
       - 8080:5678 # For debugging
   
-  app-reverse-proxy:
-    container_name: app-reverse-proxy
+  app-proxy:
+    container_name: app-proxy
     depends_on:
       - app
     image: nginx:stable # TODO: Pull and manage this image from our private container registry
@@ -127,18 +129,18 @@ services:
     #entrypoint: /bin/bash # podman run -i
     #tty: true             # podman run -t
     #
-    env_file: ./env/app-reverse-proxy.env
+    env_file: ./env/app-proxy.env
     #environment: # Override default dev env_file envvars here
     #  OVERRIDE_ENVVARS_HERE=sample
     volumes:
-      # App source volume for proxy to serve files from
-      - app-src:/usr/src/app/:Z
+      # Read-only App source volume for proxy to serve files from
+      - app-src:/usr/src/app/:Z,ro
       
       # Nginx conf files
-      - ./app/reverse-proxy/nginx.conf:/etc/nginx/nginx.conf:Z
+      - ./app/proxy/nginx.conf:/etc/nginx/nginx.conf:Z
       
       # Nginx Logs
-      - ./app/logs/reverse-proxy/:/var/log/nginx/:Z
+      - ./app/logs/proxy/:/var/log/nginx/:Z
 
   database:
     container_name: database
@@ -170,11 +172,11 @@ services:
     ports:
       - 3306:3306
   
-  gateway-reverse-proxy:
-    container_name: gateway-reverse-proxy
+  gateway-proxy:
+    container_name: gateway-proxy
     depends_on:
-      - api-reverse-proxy
-      - app-reverse-proxy
+      - api-proxy
+      - app-proxy
     image: nginx:stable # TODO: Pull and manage this image from our private container registry
     restart: "no"
     #
@@ -184,15 +186,15 @@ services:
     #entrypoint: /bin/bash # podman run -i
     #tty: true             # podman run -t
     #
-    env_file: ./env/gateway-reverse-proxy.env
+    env_file: ./env/gateway-proxy.env
     #environment: # Override default dev env_file envvars here
     #  OVERRIDE_ENVVARS_HERE=sample
     volumes:
       # Nginx conf files
-      - ./gateway-reverse-proxy/nginx.conf:/etc/nginx/nginx.conf:Z
+      - ./gateway-proxy/nginx.conf:/etc/nginx/nginx.conf:Z
       
       # Nginx Logs
-      - ./gateway-reverse-proxy/logs/:/var/log/nginx/:Z
+      - ./gateway-proxy/logs/:/var/log/nginx/:Z
     ports:
       - 80:80     # App http server
       - 4321:4321 # Api http server

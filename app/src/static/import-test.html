@@ -1,1 +1,14 @@
-<p>This is a test!</p>
+<p>This is an imported paragraph test!</p>
+
+<script type="text/javascript-template">
+    <% let words = ['This', 'is', 'an', 'imported', 'ejs', 'template', 'test']; %>
+    <div id="words-list">
+        <% if(words.length) { %>
+            <ul>
+                <% words.forEach(function(word) { %>
+                    <li><%= word %></li>
+                <% }); %>
+            </ul>
+        <% } %>
+    </div>
+</script>

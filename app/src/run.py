@@ -10,12 +10,13 @@ APP_CREATE_TABLES         = bool(str2bool(os.environ['APPLICATION_INIT_DATABASE'
 APP_HOST                  = str(os.environ['APPLICATION_HOST'])
 APP_PORT                  = int(os.environ['APPLICATION_PORT'])
 
-APP_DEBUG                 = bool(os.getenv('APPLICATION_ENABLE_DEBUGGER'))
-APP_DEBUG_WAIT_FOR_CLIENT = bool(os.getenv('APPLICATION_DEBUGGER_WAIT_FOR_CLIENT'))
+APP_DEBUG                 = bool(str2bool(os.getenv('APPLICATION_ENABLE_DEBUGGER', False)))
+APP_DEBUG_PORT            = int(os.getenv('APPLICATION_DEBUGGER_PORT', 5678))
+APP_DEBUG_WAIT_FOR_CLIENT = bool(str2bool(os.getenv('APPLICATION_DEBUGGER_WAIT_FOR_CLIENT', False)))
 
 if APP_ENV is Environment.DEVELOPMENT and APP_DEBUG is True:
     import debugpy
-    debugpy.listen(('0.0.0.0', 5678))
+    debugpy.listen((APP_HOST, 5678))
     
     if APP_DEBUG_WAIT_FOR_CLIENT is True:
         debugpy.wait_for_client()

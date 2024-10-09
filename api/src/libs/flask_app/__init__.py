@@ -16,19 +16,6 @@ def create_app(name, env, use_database, create_tables):
     
     app = Flask(name if name is not None else __name__)
     
-    # Disable CORS for js modules that,
-    # unlike other resources for some reason,
-    # aren't working with it enabled.
-    #
-    # There might be a better way to get CORS
-    # working with js modules
-    #
-    CORS(app, resources={
-        r'/static/libraries/*': {
-            'origins': '*'
-        }
-    })
-    
     # Given a valid Environment, attempt to instantiate,
     # then load-in, the corresponding Flask Config settings
     env_config = get_environment_config(env)

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    
+    <title>Movie Manager</title>
+    
+    <!-- Page Style -->
+    <link id="search-page-style" rel="stylesheet" href="/static/pages/Search/Search.css">
+    
+    <!-- JS Modules -->
+    <script type="importmap">{
+        "imports": {
+            "html-includes": "/static/libraries/HTML Includes/HTMLIncludes.js",
+            "js-templates":  "/static/libraries/JS Templates/JSTemplates.js"
+        }
+    }</script>
+    
+    <!-- Client-side Component Loading -->
+    <script type="module">
+        import HTMLIncludes from "html-includes";
+        import JSTemplates  from "js-templates";
+        
+        /** Process potentially unprocessed content */
+        function loadContent() {
+            HTMLIncludes.fetch();
+            JSTemplates.render();
+        }
+        
+        /**
+         * Observe mutations to DOM elements on the document,
+         * so that potentially unprocessed content can be loaded
+         */
+        function loadContentOnPageChange() {
+            document.addEventListener("DOMNodeInserted", function(e) {
+                //console.log(e.target);
+                loadContent() // TODO: Only process mutatated elements
+            }, false);
+            
+            /*
+            TODO: Troubleshoot. MutationObserver pattern will be replacing the DOMNodeInserted listener
+            let observer = new MutationObserver(function(mutations) {
+                //console.log(mutations);
+                loadContent() // TODO: Only process mutatated elements
+            })
+            return observer.observe(document.documentElement, { childList: true });
+            */
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initial page loaded.
+            // Process current, and upcomming, potentially unprocessed client-side content
+            loadContent() // current
+            loadContentOnPageChange() // upcomming
+        });
+    </script>
+    
+    <!-- Hide the page if JavaScript isn't enabled -->
+    <noscript>
+        <style type="text/css">.page { display: none; }</style>
+        <div id="noscript-message"><p>This site requires JavaScript</p></div>
+    </noscript>
+</head>
+<body>
+    <div id="search-page" class="page">
+        
+        <p>Hello World!</p>
+        
+        <script type="text/javascript-template">
+            <% let words = ['This', 'is', 'an', 'ejs', 'template', 'test']; %>
+            <div id="words-list">
+                <% if(words.length) { %>
+                    <ul>
+                        <% words.forEach(function(word) { %>
+                            <li><%= word %></li>
+                        <% }); %>
+                    </ul>
+                <% } %>
+            </div>
+        </script>
+        
+        <div id="test-include">
+            <include src="/static/import-test.html"><p>Loading...</p></include>
+        </div>
+        
+        <form id="search-form" action="/api/search" method="post">
+            <fieldset>
+                <legend>Search</legend>
+                <div>
+                    <label for="imdb-id">IMDb ID:</label>
+                    <input name="imdb-id" placeholder="A valid IMDb ID (e.g. tt1285016)">
+                </div>
+                <div>
+                    <label for="media-title">Media Title:</label>
+                    <input name="media-title" placeholder="Media Title" required autofocus>
+                </div>
+                <div>
+                    <label for="media-year">Release Year:</label>
+                    <input name="media-year" placeholder="Year of release">
+                </div>
+                <div>
+                    <label for="media-type">Media Type:</label>
+                    <select name="media-type">
+                        <option value="movie">Movie</option>
+                        <option value="series">Series</option>
+                        <option value="episode">Episode</option>
+                    </select>
+                </div>
+                <div>
+                    <input name="search" type="submit" value="Search">
+                </div>
+            </fieldset>
+        </form>
+        
+        <script>
+                let form = document.querySelector("#search-form");
+                
+                form.addEventListener("submit", function(event){
+                    event.preventDefault();
+                    
+                    fetch(form.action, {
+                        method: "post",
+                        body: new URLSearchParams(new FormData(form))
+                    });
+                });
+        </script>
+        
+    </div>
+</body>
+</html>

@@ -509,6 +509,14 @@
         }
         alias clean='down'
     
+    ############
+    # down pod #
+    ############
+        
+        function down-pod {
+            podman pod rm --force --ignore --time 0 "pod_${COMPOSE_PROJECT_NAME:-'moviemanager'}"
+        }
+    
     ##########
     # attach #
     ##########
@@ -545,7 +553,7 @@
             #       https://github.com/containers/podman-compose/issues/921
             #
             stop
-            podman pod rm --force --ignore --time 0 pod_moviecodingproject
+            down -- -t 1 && down-pod
             start
             return "$?"
         }
@@ -611,6 +619,26 @@
             local image='mariadb'
             
             command podman run -it --rm "$image" mariadb --host host.containers.internal -P3306 --user movie_manager_user -ppass1234 --database MovieManager
+        }
+    
+    ###################
+    # fix-permissions #
+    ###################
+        
+        function fix-permissions {
+            local args=("$@")
+            
+            local services=('app' 'api')
+            
+            for service in "${services[@]}"; do
+                pushd . >> /dev/null
+                    trap 'popd > /dev/null' SIGINT SIGABRT
+                    cd "./$service/"
+                    sudo chown -R $(whoami):$(whoami) src
+                    sudo chmod -R 755 src
+                    sudo chcon -Rt svirt_sandbox_file_t src
+                popd >> /dev/null
+            done
         }
     
     ########

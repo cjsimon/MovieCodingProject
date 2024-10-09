@@ -7,8 +7,10 @@ class ServiceDiscovery:
     
     @staticmethod
     def getApiHost():
+        return 'host.containers.internal:4321'
         pass
     
     @staticmethod
     def getAppHost():
+        return 'host.containers.internal:80'
         pass

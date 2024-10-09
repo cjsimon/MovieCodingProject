@@ -5,8 +5,6 @@ ARG python_image=docker.io/python:${python_version} # TODO: Pull and manage this
 
 ARG base_image=${python_image}
 
-ARG src_dir='/usr/src/app/'
-
 # Base Image
 FROM ${base_image} AS base-image
     
@@ -49,7 +47,7 @@ FROM os-dependencies-shared AS os-dependencies-development
 # Shared Project Dependencies
 FROM os-dependencies-${image_variant} AS project-dependencies-shared
     
-    WORKDIR ${src_dir}
+    WORKDIR ${APPLICATION_SOURCE_DIRECTORY}
     
     # COPY in the Pipenv requirements independently of the app source
     COPY ./src/Pipfile.lock ./
@@ -88,9 +86,9 @@ FROM post-project-dependencies-shared AS post-project-dependencies-development
 # Shared Entrypoint
 FROM post-project-dependencies-${image_variant} AS entrypoint-shared
     
-    WORKDIR ${src_dir}
+    WORKDIR ${APPLICATION_SOURCE_DIRECTORY}
     ENTRYPOINT ["gunicorn"]
-    CMD ["run:app"]
+    CMD ["-c", "python:libs.gunicorn.configuration", "run:app"]
 
 # Final Image
 FROM entrypoint-shared AS final-image

@@ -17,8 +17,8 @@
 			"path": "../database/"
 		},
         {
-			"name": "Gateway Reverse Proxy",
-			"path": "../gateway-reverse-proxy/"
+			"name": "Gateway Proxy",
+			"path": "../gateway-proxy/"
 		},
         {
 			"name": "IaC",

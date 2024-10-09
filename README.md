@@ -119,14 +119,14 @@ You can establish a connection to the database directly using the `database-conn
 Alternativley, you can run the task command by hand:  
 
 ```bash
-image='mariadb'
+IMAGE='mariadb'
 
-podman run -it --rm "$image" mariadb --host host.containers.internal -P3306 --user movie_manager_user -ppass1234 --database MovieManager
+podman run -it --rm "$IMAGE" mariadb --host host.containers.internal -P3306 --user movie_manager_user -ppass1234 --database MovieManager
 ```
 
 ##### Local Troubleshooting
 
-###### Troubleshooting Container Prematurley Crashing
+###### Troubleshooting a Prematurley-Crashing Container
 
 To troubleshoot a container that's exiting prematurely on, or close after startup, you may override a its command and entrypoint in the `compose.yml` stack:  
 
@@ -194,6 +194,25 @@ CONTAINER='app' # or 'api', etc
 pipenv lock
 exit # Exit the container terminal session
 ```
+
+###### Volume Permission Issues
+
+If you see a permission denied error from services attmpeting to access their volume mounts, try resetting the ownership of all the service source code volumes. In the root project directory, run:  
+
+```bash
+# Note: This will chown $(whoami):$(whoami), chmod 755, and chcon svirt_sandbox_file_t
+#       all src dirs of each service
+#
+./Taskfile fix-permissions
+```
+
+Alternatively, you may temporarily disable SELinux:  
+
+```bash
+sudo setenforce 0
+```
+
+***TODO:* It shouldn't be a necessity to disable SELinux, even as a workaround. Look into tracking and fixing any and all SELinux related podman rootless-container issues. Using Named-volumes, or just sharing volumes between containers, seems to be causing this issue**
 
 ##### App Debugging
 
