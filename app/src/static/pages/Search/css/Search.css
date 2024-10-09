@@ -1,0 +1,13 @@
+html, body {
+    height:  100%;
+    margin:  0;
+    border:  0;
+    padding: 0;
+}
+
+* {
+    color-scheme:     dark;
+    color:            white;
+    border-color:     #6d614d;
+    scrollbar-color:  #6d614d black;
+}

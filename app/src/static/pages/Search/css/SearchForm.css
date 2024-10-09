@@ -1,0 +1,21 @@
+#search-form {
+    display: table;
+    width:   100%;
+    height:  87%;
+}
+
+#search-form fieldset {
+    display:          table-cell;
+    vertical-align:   middle;
+    height:           100%;
+    background-color: black;
+}
+
+#search-form input,
+#search-form select {
+    width:            100%;
+    padding:          12px 20px;
+    margin:           8px 0;
+    box-sizing:       border-box;
+    background-color: black;
+}

@@ -7,8 +7,12 @@
     
     <title>Movie Manager</title>
     
-    <!-- Page Style -->
-    <link id="search-page-style" rel="stylesheet" href="/static/pages/Search/Search.css">
+    <!-- Styles -->
+    <link id="global-page-style"                     rel="stylesheet" href="/static/pages/Search/css/Search.css">
+    <link id="search-page-style"                     rel="stylesheet" href="/static/pages/Search/css/SearchPage.css">
+    <link id="search-title-style"                    rel="stylesheet" href="/static/pages/Search/css/SearchTitle.css">
+    <link id="search-title-spacer-search-form-style" rel="stylesheet" href="/static/pages/Search/css/SearchTitleSpacerForm.css">
+    <link id="search-form-style"                     rel="stylesheet" href="/static/pages/Search/css/SearchForm.css">
     
     <!-- JS Modules -->
     <script type="importmap">{
@@ -66,39 +70,25 @@
 <body>
     <div id="search-page" class="page">
         
-        <p>Hello World!</p>
-        
-        <script type="text/javascript-template">
-            <% let words = ['This', 'is', 'an', 'ejs', 'template', 'test']; %>
-            <div id="words-list">
-                <% if(words.length) { %>
-                    <ul>
-                        <% words.forEach(function(word) { %>
-                            <li><%= word %></li>
-                        <% }); %>
-                    </ul>
-                <% } %>
-            </div>
-        </script>
-        
-        <div id="test-include">
-            <include src="/static/import-test.html"><p>Loading...</p></include>
+        <div id="search-title">
+            <h1>Movie Manager</h1>
         </div>
+        
+        <div id="search-title-spacer-search-form"></div>
         
         <form id="search-form" action="/api/search" method="post">
             <fieldset>
-                <legend>Search</legend>
                 <div>
                     <label for="imdb-id">IMDb ID:</label>
-                    <input name="imdb-id" placeholder="A valid IMDb ID (e.g. tt1285016)">
+                    <input name="imdb-id" type=text placeholder="A valid IMDb ID (e.g. tt1285016)">
                 </div>
                 <div>
                     <label for="media-title">Media Title:</label>
-                    <input name="media-title" placeholder="Media Title" required autofocus>
+                    <input name="media-title" type=text placeholder="Media Title" required autofocus>
                 </div>
                 <div>
                     <label for="media-year">Release Year:</label>
-                    <input name="media-year" placeholder="Year of release">
+                    <input name="media-year" type=number placeholder="Year of release">
                 </div>
                 <div>
                     <label for="media-type">Media Type:</label>
