@@ -48,10 +48,36 @@ services:
       #
       # Note: You may comment out this volume to use the src/
       #       code that comes pre-built with this image variant
-      - ./api/src/:/usr/src/app/:Z
+      - api-src:/usr/src/app/:Z
     ports:
-      - 5678:1234 # For debugging
-    
+      - 1234:5678 # For debugging
+  
+  api-reverse-proxy:
+    container_name: api-reverse-proxy
+    depends_on:
+      - api
+    image: nginx:stable # TODO: Pull and manage this image from our private container registry
+    restart: "no"
+    #
+    # Uncomment to override the service container's
+    # default command and entrypoint for debugging
+    #command: ""
+    #entrypoint: /bin/bash # podman run -i
+    #tty: true             # podman run -t
+    #
+    env_file: ./env/api-reverse-proxy.env
+    #environment: # Override default dev env_file envvars here
+    #  OVERRIDE_ENVVARS_HERE=sample
+    volumes:
+      # App source volume for proxy to serve files from
+      - api-src:/usr/src/app/:Z
+      
+      # Nginx conf files
+      - ./api/reverse-proxy/nginx.conf:/etc/nginx/nginx.conf:Z
+      
+      # Nginx Logs
+      - ./api/logs/reverse-proxy/:/var/log/nginx/:Z
+  
   app:
     container_name: app
     depends_on:
@@ -84,10 +110,36 @@ services:
       #
       # Note: You may comment out this volume to use the src/
       #       code that comes pre-built with this image variant
-      - ./app/src/:/usr/src/app/:Z
+      - app-src:/usr/src/app/:Z
     ports:
-      - 5678:8080 # For debugging
-    
+      - 8080:5678 # For debugging
+  
+  app-reverse-proxy:
+    container_name: app-reverse-proxy
+    depends_on:
+      - app
+    image: nginx:stable # TODO: Pull and manage this image from our private container registry
+    restart: "no"
+    #
+    # Uncomment to override the service container's
+    # default command and entrypoint for debugging
+    #command: ""
+    #entrypoint: /bin/bash # podman run -i
+    #tty: true             # podman run -t
+    #
+    env_file: ./env/app-reverse-proxy.env
+    #environment: # Override default dev env_file envvars here
+    #  OVERRIDE_ENVVARS_HERE=sample
+    volumes:
+      # App source volume for proxy to serve files from
+      - app-src:/usr/src/app/:Z
+      
+      # Nginx conf files
+      - ./app/reverse-proxy/nginx.conf:/etc/nginx/nginx.conf:Z
+      
+      # Nginx Logs
+      - ./app/logs/reverse-proxy/:/var/log/nginx/:Z
+
   database:
     container_name: database
     image: mariadb:lts # TODO: Pull and manage this image from our private container registry
@@ -118,11 +170,11 @@ services:
     ports:
       - 3306:3306
   
-  reverse-proxy:
-    container_name: reverse-proxy
+  gateway-reverse-proxy:
+    container_name: gateway-reverse-proxy
     depends_on:
-      - api
-      - app
+      - api-reverse-proxy
+      - app-reverse-proxy
     image: nginx:stable # TODO: Pull and manage this image from our private container registry
     restart: "no"
     #
@@ -132,15 +184,29 @@ services:
     #entrypoint: /bin/bash # podman run -i
     #tty: true             # podman run -t
     #
-    env_file: ./env/reverse-proxy.env
+    env_file: ./env/gateway-reverse-proxy.env
     #environment: # Override default dev env_file envvars here
     #  OVERRIDE_ENVVARS_HERE=sample
     volumes:
       # Nginx conf files
-      - ./reverse-proxy/nginx.conf:/etc/nginx/nginx.conf:Z
+      - ./gateway-reverse-proxy/nginx.conf:/etc/nginx/nginx.conf:Z
       
       # Nginx Logs
-      - ./reverse-proxy/logs/:/var/log/nginx/:Z
+      - ./gateway-reverse-proxy/logs/:/var/log/nginx/:Z
     ports:
       - 80:80     # App http server
       - 4321:4321 # Api http server
+
+volumes:
+  api-src:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./api/src/
+  app-src:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./app/src/

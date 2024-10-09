@@ -17,24 +17,33 @@ class Config(object):
     Configuration base for all app environments
     """
     
-    #TODO: Don't hardcode path traversal for BASE_PATH
-    BASE_PATH    = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    CSRF_ENABLED = True
+    #########
+    # Paths #
+    if 1:####
+        
+        BASE_PATH     = os.environ['APPLICATION_SOURCE_DIRECTORY']
+        
+        TEMPLATE_DIR  = 'pages'
+        TEMPLATE_PATH = os.path.join(BASE_PATH, TEMPLATE_DIR)
+        
+        STATIC_DIR    = 'static'
+        STATIC_PATH   = os.path.join(BASE_PATH, STATIC_DIR)
     
-    # dialect+driver://username:password@host:port/database
-    SQLALCHEMY_DATABASE_URI = \
-        'mariadb+mariadbconnector://%(username)s:%(password)s@%(hostname)s:%(hostport)s/%(database)s' % {
-            'username': os.environ.get('DATABASE_USER'),
-            'password': os.environ.get('DATABASE_PASS'),
-            'hostname': os.environ.get('DATABASE_HOST'),
-            'hostport': os.environ.get('DATABASE_PORT'),
-            'database': os.environ.get('DATABASE_NAME'),
-        }
-    
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
-    
-    TEMPLATE_DIR  = 'pages'
-    TEMPLATE_PATH = os.path.join(BASE_PATH, TEMPLATE_DIR)
+    ##############
+    # SQLAlchemy #
+    if 1:#########
+        
+        # dialect+driver://username:password@host:port/database
+        SQLALCHEMY_DATABASE_URI = \
+            'mariadb+mariadbconnector://%(username)s:%(password)s@%(hostname)s:%(hostport)s/%(database)s' % {
+                'username': os.environ.get('DATABASE_USER'),
+                'password': os.environ.get('DATABASE_PASS'),
+                'hostname': os.environ.get('DATABASE_HOST'),
+                'hostport': os.environ.get('DATABASE_PORT'),
+                'database': os.environ.get('DATABASE_NAME'),
+            }
+        
+        SQLALCHEMY_TRACK_MODIFICATIONS = False
     
 class ProductionConfig(Config):
     """

@@ -34,7 +34,9 @@ def create_app(name, env, use_database, create_tables):
     env_config = get_environment_config(env)
     app.config.from_object(env_config)
     
+    # Set server paths
     app.template_folder=env_config.TEMPLATE_PATH
+    app.static_folder=env_config.STATIC_PATH
     
     # Create a db instance with a scoped session and base.
     # Bind it to the app, and create table schema if requested

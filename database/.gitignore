@@ -2,3 +2,4 @@
 # and only keep that directory checked-in
 dbdata/*
 !dbdata/.gitkeep
+logs/

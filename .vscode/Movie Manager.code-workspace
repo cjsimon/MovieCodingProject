@@ -17,12 +17,12 @@
 			"path": "../database/"
 		},
         {
-			"name": "IaC",
-			"path": "../iac/"
+			"name": "Gateway Reverse Proxy",
+			"path": "../gateway-reverse-proxy/"
 		},
         {
-			"name": "Reverse Proxy",
-			"path": "../reverse-proxy/"
+			"name": "IaC",
+			"path": "../iac/"
 		},
 	],
 	"settings": {},

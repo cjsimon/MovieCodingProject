@@ -70,7 +70,7 @@ class Routes:
         if filename.endswith('.js') or filename.endswith('.mjs'):
             mimetype = 'text/javascript'
         
-        return send_from_directory("""self.app.static_folder""" '/static', filename, mimetype=mimetype)
+        return send_from_directory(filename=filename, mimetype=mimetype)
     
     @blueprint.route('/', methods=['GET', 'POST'])
     @blueprint.route('/search', methods=['GET', 'POST'])

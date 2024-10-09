@@ -17,11 +17,17 @@ class Config(object):
     Configuration base for all app environments
     """
     
-    #TODO: Don't hardcode path traversal for BASE_PATH
-    BASE_PATH     = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    CSRF_ENABLED  = True
-    TEMPLATE_DIR  = 'pages'
-    TEMPLATE_PATH = os.path.join(BASE_PATH, TEMPLATE_DIR)
+    #########
+    # Paths #
+    if 1:####
+        
+        BASE_PATH     = os.environ['APPLICATION_SOURCE_DIRECTORY']
+        
+        TEMPLATE_DIR  = 'pages'
+        TEMPLATE_PATH = os.path.join(BASE_PATH, TEMPLATE_DIR)
+        
+        STATIC_DIR    = 'static'
+        STATIC_PATH   = os.path.join(BASE_PATH, STATIC_DIR)
 
 class ProductionConfig(Config):
     """
