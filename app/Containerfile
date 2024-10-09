@@ -1,28 +1,38 @@
 ARG image_variant
-ENV BUILD_ENVIRONMENT=${image_variant}
 
 ARG python_version=3.12
 ARG python_image=docker.io/python:${python_version} # TODO: Pull and manage this image from our private container registry
 
 ARG base_image=${python_image}
 
+ARG src_dir='/usr/src/app/'
+
+# Base Image
 FROM ${base_image} AS base-image
     
+    ARG image_variant
+    ENV BUILD_ENVIRONMENT ${image_variant}
     
+    ARG src_dir
+    ENV APPLICATION_SOURCE_DIRECTORY ${src_dir}
 
+# Shared Base
 FROM base-image AS base-shared
     
-    
+    #
 
+# Shared OS Dependencies
 FROM base-shared AS os-dependencies-shared
     
     # Install micropipenv
     RUN pip install 'micropipenv>=1.8.0,<1.9.0'
 
+# Production OS Dependencies
 FROM os-dependencies-shared AS production-os-dependencies
     
-    
+    #
 
+# Development OS Dependencies
 FROM os-dependencies-shared AS os-dependencies-development
     
     # Install PipEnv too for development,
@@ -31,18 +41,21 @@ FROM os-dependencies-shared AS os-dependencies-development
     # See: /README.md#Working-with-Project-Level-Dependencies
     RUN pip install pipenv
 
+# Shared Project Dependencies
 FROM os-dependencies-${image_variant} AS project-dependencies-shared
     
-    WORKDIR /usr/src/app/
+    WORKDIR ${src_dir}
     
     # COPY in the Pipenv requirements independently of the app source
     COPY ./src/Pipfile.lock ./
 
+# Production Project Dependencies
 FROM project-dependencies-shared AS project-dependencies-production
     
     # Install prod app dependencies
     RUN micropipenv install --method pipenv
     
+# Development Project Dependencies
 FROM project-dependencies-shared AS project-dependencies-development
     
     # Install app dependencies, including dev ones
@@ -52,23 +65,28 @@ FROM project-dependencies-shared AS project-dependencies-development
     # without needing to volume in a source code directory ourselves
     COPY ./src/ ./
 
+# Shared Post-"Project Dependencies"
 FROM project-dependencies-${image_variant} AS post-project-dependencies-shared
     
-    
+    #
 
+# Production Post-"Project Dependencies"
 FROM post-project-dependencies-shared AS post-project-dependencies-production
     
-    
+    #
 
+# Development Post-"Project Dependencies"
 FROM post-project-dependencies-shared AS post-project-dependencies-development
     
-    
+    #
 
+# Shared Entrypoint
 FROM post-project-dependencies-${image_variant} AS entrypoint-shared
     
-    WORKDIR /usr/src/app/
+    WORKDIR ${src_dir}
     ENTRYPOINT ["gunicorn"]
     CMD ["run:app"]
 
+# Final Image
 FROM entrypoint-shared AS final-image
 FROM final-image AS moviemanager-app-${image_variant}
